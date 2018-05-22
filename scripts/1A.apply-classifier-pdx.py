@@ -67,7 +67,7 @@ readRDS = robjects.r['readRDS']
 
 
 # Load PDX gene expression data in RDS format
-file = os.path.join('data', 'raw', 'PPTC_FPKM_matrix.RDS')
+file = os.path.join('data', 'raw', 'PPTC_FPKM_matrix_withModelID.RDS')
 
 exprs_rds = readRDS(file)
 exprs_df = pandas2ri.ri2py(exprs_rds).set_index('gene_short_name').transpose()
