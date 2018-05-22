@@ -58,6 +58,7 @@ get_ipython().run_line_magic('matplotlib', 'inline')
 
 file = os.path.join('data', 'raw', 'ras.genes.txt')
 ras_status_df = pd.read_table(file)
+
 print(ras_status_df.shape)
 ras_status_df.head(3)
 
@@ -65,7 +66,7 @@ ras_status_df.head(3)
 # In[4]:
 
 
-len(ras_status_df.Tumor_Sample_Barcode.unique())
+len(ras_status_df.Model.unique())
 
 
 # In[5]:
@@ -94,7 +95,7 @@ tp53_status_df.head(3)
 # In[8]:
 
 
-len(tp53_status_df.Tumor_Sample_Barcode.unique())
+len(tp53_status_df.Model.unique())
 
 
 # In[9]:
@@ -109,22 +110,27 @@ tp53_status_df.Hugo_Symbol.value_counts()
 tp53_status_df.Variant_Classification.value_counts()
 
 
-# ## Load Barcode Map
+# ## Load Clinical Data Information
+# 
+# This stores histology information
 
 # In[11]:
 
 
-file = os.path.join('data', 'raw', 'master-PPTC-annotations-2018-01-29.csv')
-barcode_df = pd.read_csv(file)
+file = os.path.join('data', 'raw', '2018-05-22-pdx-clinical.txt')
+clinical_df = pd.read_table(file)
 
-print(barcode_df.shape)
-barcode_df.head(3)
+# Make every histology with the word `Other` in it in the same class
+clinical_df.loc[clinical_df.Histology.str.contains('Other'), 'Histology'] = "Other"
+
+print(clinical_df.shape)
+clinical_df.head(3)
 
 
 # In[12]:
 
 
-barcode_df.Histology.value_counts()
+clinical_df.Histology.value_counts()
 
 
 # ## Load Predictions
@@ -139,108 +145,64 @@ print(scores_df.shape)
 scores_df.head(3)
 
 
-# ## Map Barcodes to Align Status
-
 # In[14]:
 
 
-model_id = (
-    scores_df.sample_id
-    .str.replace('PPTC-', '')
-    .str.replace('-R', '')
-    .str.replace('-D', '')
-    .str.replace('-', '')
-    .str.lower()
-)
-
-scores_df = scores_df.assign(model_id=model_id)
-scores_df.head(3)
+scores_df = scores_df.merge(clinical_df, how='left', left_on='sample_id', right_on='Model')
+print(scores_df.shape)
+scores_df
 
 
 # In[15]:
 
 
-model_id = (
-    barcode_df.Model
-    .str.replace('-', '')
-    .str.lower()
-)
-
-barcode_df = barcode_df.assign(model_id=model_id)
-barcode_df = barcode_df.loc[:, ['Model', 'model_id', 'Tumor_Sample_Barcode', 'Histology']]
-barcode_df.head(3)
+# Did any gene expression values fail to map to barcodes?
+scores_df.Model.isna().value_counts()
 
 
 # In[16]:
 
 
-scores_df = scores_df.merge(barcode_df, how='left', left_on='model_id', right_on='model_id')
-scores_df.head(3)
+scores_df = (
+    scores_df.merge(
+        tp53_status_df.loc[:, ['Hugo_Symbol', 'Model']],
+        how='left', left_on='Model', right_on='Model'
+    )
+    .merge(
+        ras_status_df.loc[:, ['Hugo_Symbol', 'Model']],
+        how='left', left_on='Model', right_on='Model',
+        suffixes=('_tp53', '_ras')
+    )
+)
+
+scores_df.head(2)
 
 
 # In[17]:
 
 
-missing_id_df = scores_df.loc[scores_df.Tumor_Sample_Barcode.isna(), :]
-use_scores_df = scores_df.loc[-scores_df.Tumor_Sample_Barcode.isna(), :]
+scores_df = scores_df.assign(tp53_status = scores_df['Hugo_Symbol_tp53'])
+scores_df = scores_df.assign(ras_status = scores_df['Hugo_Symbol_ras'])
 
 
 # In[18]:
 
 
-missing_id_df.shape
+scores_df.loc[:, ['tp53_status', 'ras_status']] = (
+    scores_df.loc[:, ['tp53_status', 'ras_status']].fillna(0)
+)
+
+scores_df.loc[:, ['Hugo_Symbol_tp53', 'Hugo_Symbol_ras']] = (
+    scores_df.loc[:, ['Hugo_Symbol_tp53', 'Hugo_Symbol_ras']].fillna('wild-type')
+)
+
+scores_df.loc[scores_df['tp53_status'] != 0, 'tp53_status'] = 1
+scores_df.loc[scores_df['ras_status'] != 0, 'ras_status'] = 1
+
+scores_df.head(2)
 
 
 # In[19]:
-
-
-use_scores_df = (
-    use_scores_df.merge(
-        tp53_status_df.loc[:, ['Hugo_Symbol', 'Tumor_Sample_Barcode']],
-        how='left', left_on='Tumor_Sample_Barcode', right_on='Tumor_Sample_Barcode'
-    )
-    .merge(
-        ras_status_df.loc[:, ['Hugo_Symbol', 'Tumor_Sample_Barcode']],
-        how='left', left_on='Tumor_Sample_Barcode', right_on='Tumor_Sample_Barcode',
-        suffixes=('_tp53', '_ras')
-    )
-)
-
-use_scores_df.head(2)
-
-
-# In[20]:
-
-
-use_scores_df = use_scores_df.assign(tp53_status = use_scores_df['Hugo_Symbol_tp53'])
-use_scores_df = use_scores_df.assign(ras_status = use_scores_df['Hugo_Symbol_ras'])
-
-
-# In[21]:
-
-
-use_scores_df.loc[:, ['tp53_status', 'ras_status']] = (
-    use_scores_df.loc[:, ['tp53_status', 'ras_status']].fillna(0)
-)
-
-use_scores_df.loc[:, ['Hugo_Symbol_tp53', 'Hugo_Symbol_ras']] = (
-    use_scores_df.loc[:, ['Hugo_Symbol_tp53', 'Hugo_Symbol_ras']].fillna('wild-type')
-)
-
-use_scores_df.loc[use_scores_df['tp53_status'] != 0, 'tp53_status'] = 1
-use_scores_df.loc[use_scores_df['ras_status'] != 0, 'ras_status'] = 1
-
-use_scores_df.head(2)
-
-
-# In[22]:
-
-
-sample_class = use_scores_df.loc[:, 'tp53_status']
-classifier_score = use_scores_df.loc[:, 'tp53_score']
-
-
-# In[23]:
 
 
 n_classes = 2
@@ -265,9 +227,9 @@ for status, score, shuff in zip(('ras_status', 'tp53_status'),
                                 ('ras_shuffle', 'tp53_shuffle')):
     
     # Obtain Metrics
-    sample_status = use_scores_df.loc[:, status]
-    sample_score = use_scores_df.loc[:, score]
-    shuffle_score = use_scores_df.loc[:, shuff]
+    sample_status = scores_df.loc[:, status]
+    sample_score = scores_df.loc[:, score]
+    shuffle_score = scores_df.loc[:, shuff]
  
     # Get Metrics
     fpr_pdx[idx], tpr_pdx[idx], _ = roc_curve(sample_status, sample_score)
@@ -284,14 +246,14 @@ for status, score, shuff in zip(('ras_status', 'tp53_status'),
     idx += 1
 
 
-# In[24]:
+# In[20]:
 
 
 if not os.path.exists('figures'):
     os.makedirs('figures')
 
 
-# In[25]:
+# In[21]:
 
 
 # Visualize ROC curves
@@ -328,10 +290,10 @@ lgd = plt.legend(bbox_to_anchor=(1.03, 0.85),
                  fontsize=10)
 
 file = os.path.join('figures', 'pdx_classifier_roc_curve.pdf')
-plt.savefig(file, bbox_extra_artists=(lgd,), bbox_inches='tight')
+#plt.savefig(file, bbox_extra_artists=(lgd,), bbox_inches='tight')
 
 
-# In[26]:
+# In[22]:
 
 
 # Visualize PR curves
@@ -364,30 +326,30 @@ lgd = plt.legend(bbox_to_anchor=(1.03, 0.85),
                  fontsize=10)
 
 file = os.path.join('figures', 'pdx_classifier_precision_recall_curve.pdf')
-plt.savefig(file, bbox_extra_artists=(lgd,), bbox_inches='tight')
+#plt.savefig(file, bbox_extra_artists=(lgd,), bbox_inches='tight')
 
 
-# In[27]:
+# In[23]:
 
 
 # Output t-test results
-t_results_ras = ttest_ind(a = use_scores_df.query('ras_status == 1').loc[:, 'ras_score'],
-                          b = use_scores_df.query('ras_status == 0').loc[:, 'ras_score'],
+t_results_ras = ttest_ind(a = scores_df.query('ras_status == 1').loc[:, 'ras_score'],
+                          b = scores_df.query('ras_status == 0').loc[:, 'ras_score'],
                           equal_var = False)
 t_results_ras
 
 
-# In[28]:
+# In[24]:
 
 
 # Output t-test results
-t_results_tp53 = ttest_ind(a = use_scores_df.query('tp53_status == 1').loc[:, 'tp53_score'],
-                          b = use_scores_df.query('tp53_status == 0').loc[:, 'tp53_score'],
+t_results_tp53 = ttest_ind(a = scores_df.query('tp53_status == 1').loc[:, 'tp53_score'],
+                          b = scores_df.query('tp53_status == 0').loc[:, 'tp53_score'],
                           equal_var = False)
 t_results_tp53
 
 
-# In[29]:
+# In[25]:
 
 
 x1, x2 = 0, 1
@@ -397,13 +359,13 @@ y1, y2, h = 0.98, 1, 0.03
 plt.rcParams['figure.figsize']=(3.5, 4)
 ax = sns.boxplot(x="ras_status",
                  y="ras_score",
-                 data=use_scores_df,
+                 data=scores_df,
                  palette = 'Greys',
                  fliersize=0)
 
 ax = sns.stripplot(x="ras_status",
                    y="ras_score",
-                   data=use_scores_df,
+                   data=scores_df,
                    dodge=True,
                    edgecolor='black',
                    jitter=0.25,
@@ -426,7 +388,7 @@ file = os.path.join('figures', 'ras_predictions.pdf')
 plt.savefig(file)
 
 
-# In[30]:
+# In[26]:
 
 
 x1, x2 = 0, 1
@@ -436,13 +398,13 @@ y1, y2, h = 0.98, 1, 0.03
 plt.rcParams['figure.figsize']=(3.5, 4)
 ax = sns.boxplot(x="tp53_status",
                  y="tp53_score",
-                 data=use_scores_df,
+                 data=scores_df,
                  palette = 'Greys',
                  fliersize=0)
 
 ax = sns.stripplot(x="tp53_status",
                    y="tp53_score",
-                   data=use_scores_df,
+                   data=scores_df,
                    dodge=True,
                    edgecolor='black',
                    jitter=0.25,
@@ -464,19 +426,19 @@ file = os.path.join('figures', 'tp53_predictions.pdf')
 plt.savefig(file)
 
 
-# In[31]:
+# In[27]:
 
 
 ax = sns.boxplot(x="ras_status",
                  y="ras_score",
-                 data=use_scores_df,
+                 data=scores_df,
                  hue='Histology',
                  palette = 'Greys',
                  fliersize=0)
 
 ax = sns.stripplot(x="ras_status",
                    y="ras_score",
-                   data=use_scores_df,
+                   data=scores_df,
                    hue='Histology', 
                    dodge=True,
                    edgecolor='black',
@@ -489,7 +451,7 @@ ax.set_xlabel('Ras Status', fontsize=12)
 plt.axhline(linewidth=2, y=0.5, color='black', linestyle='dashed')
 
 handles, labels = ax.get_legend_handles_labels()
-lgd = plt.legend(handles[12:25], labels[12:25],
+lgd = plt.legend(handles[15:31], labels[15:31],
                bbox_to_anchor=(1.03, 1),
                  loc=2,
                  borderaxespad=0.,
@@ -501,19 +463,19 @@ file = os.path.join('figures', 'ras_predictions_histology.pdf')
 plt.savefig(file, bbox_extra_artists=(lgd,), bbox_inches='tight')
 
 
-# In[32]:
+# In[28]:
 
 
 ax = sns.boxplot(x="tp53_status",
                  y="tp53_score",
-                 data=use_scores_df,
+                 data=scores_df,
                  hue='Histology',
                  palette = 'Greys',
                  fliersize=0)
 
 ax = sns.stripplot(x="tp53_status",
                    y="tp53_score",
-                   data=use_scores_df,
+                   data=scores_df,
                    hue='Histology', 
                    dodge=True,
                    edgecolor='black',
@@ -526,7 +488,7 @@ ax.set_xlabel('TP53 Status', fontsize=12)
 plt.axhline(linewidth=2, y=0.5, color='black', linestyle='dashed')
 
 handles, labels = ax.get_legend_handles_labels()
-lgd = plt.legend(handles[12:25], labels[12:25],
+lgd = plt.legend(handles[15:31], labels[15:31],
                bbox_to_anchor=(1.03, 1),
                  loc=2,
                  borderaxespad=0.,

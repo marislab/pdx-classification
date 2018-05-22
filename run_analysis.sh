@@ -11,14 +11,14 @@ jupyter nbconvert --to=html \
         --FilesWriter.build_directory=html \
         --ExecutePreprocessor.kernel_name=python3 \
         --ExecutePreprocessor.timeout=$execute_time \
-        --execute 1.apply-classifier.ipynb 
+        --execute 1A.apply-classifier-pdx.ipynb
 
 # Notebook 2 - Evaluate the prediction performance
 jupyter nbconvert --to=html \
         --FilesWriter.build_directory=html \
         --ExecutePreprocessor.kernel_name=python3 \
         --ExecutePreprocessor.timeout=$execute_time \
-        --execute 2.evaluate-classifier.ipynb 
+        --execute 2A.evaluate-classifier-pdx.ipynb 
 
 # Convert all notebooks to python scripts
 jupyter nbconvert --to=script --FilesWriter.build_directory=scripts *.ipynb
