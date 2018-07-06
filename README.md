@@ -12,7 +12,7 @@ To reproduce the computational environment used in this pipeline, run:
 
 ```bash
 # Using conda version >4.5
-conda env create --force --file environment
+conda env create --force --file environment.yml
 
 conda activate target-classification
 ```
