@@ -1,4 +1,4 @@
-name: target-classification
+name: expression-classification
 channels:
 - conda-forge
 dependencies:
