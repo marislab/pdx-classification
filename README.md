@@ -1,4 +1,4 @@
-# Apply Machine Learning Classifiers to Target Data
+# Apply Machine Learning Classifiers to Expression Data
 
 **Gregory Way, Jo Lynne Harenza, John Maris, 2018**
 
@@ -14,7 +14,7 @@ To reproduce the computational environment used in this pipeline, run:
 # Using conda version >4.5
 conda env create --force --file environment.yml
 
-conda activate target-classification
+conda activate expression-classification
 ```
 
 ## Pipeline
@@ -30,7 +30,7 @@ To rerun all scripts, perform the following:
 
 ```bash
 # Make sure to activate the conda environment
-conda activate target-classification
+conda activate expression-classification
 
 # Run the pipeline to extract results, figures, and convert notebooks for easy viewing
 ./run_analysis.sh
