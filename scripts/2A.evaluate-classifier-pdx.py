@@ -1,11 +1,11 @@
 
 # coding: utf-8
 
-# # Evaluate Predictions Made on PDX Samples
+# # Evaluate Classifier Predictions
 # 
 # **Gregory Way, 2018**
 # 
-# In the following notebook I evaluate the predictions made by the Ras and _TP53_ classifiers in the input PDX RNAseq data.
+# In the following notebook I evaluate the predictions made by the Ras, _NF1_, and _TP53_ classifiers in the input PDX RNAseq data.
 # 
 # ## Procedure
 # 
@@ -18,15 +18,9 @@
 # 4. Evaluate predictions
 #   * I visualize the distribution of predictions between wild-type and mutant samples for both classifiers
 # 
-# ### Important Caveat
-# 
-# Many of the barcodes require updating.
-# Some samples are not identified.
-# I remove these samples from downstream evaluation, but discrepancies should be reconciled at a later date.
-# 
 # ## Output
 # 
-# The output of this notebook are several evaluation figures demonstrating the predictive performance on the input data for the two classifiers. Included in this output are predictions stratified by histology.
+# The output of this notebook are several evaluation figures demonstrating the predictive performance on the input data for the three classifiers. Included in this output are predictions stratified by histology.
 
 # In[1]:
 
@@ -44,6 +38,8 @@ from sklearn.metrics import roc_curve, precision_recall_curve
 import seaborn as sns
 import matplotlib.pyplot as plt
 
+from utils import get_mutant_boxplot, perform_ttest
+
 
 # In[2]:
 
@@ -51,70 +47,93 @@ import matplotlib.pyplot as plt
 get_ipython().run_line_magic('matplotlib', 'inline')
 
 
-# ## Load Ras Status Matrix
+# ## Load Status Matrix
 
 # In[3]:
 
 
-file = os.path.join('data', 'raw', 'ras.genes.txt')
-ras_status_df = pd.read_table(file)
+file = os.path.join('data', 'raw', '2018-09-21-muts-fusions.txt')
+status_df = pd.read_table(file)
 
-print(ras_status_df.shape)
-ras_status_df.head(3)
+print(status_df.shape)
+status_df.head(3)
 
 
 # In[4]:
 
 
-len(ras_status_df.Model.unique())
+status_df.Confidence.value_counts()
 
 
 # In[5]:
 
 
-ras_status_df.Hugo_Symbol.value_counts()
+status_df.Hugo_Symbol.value_counts()
 
 
 # In[6]:
 
 
-ras_status_df.Variant_Classification.value_counts()
+status_df.Variant_Classification.value_counts()
 
-
-# ## Load _TP53_ Status Matrix
 
 # In[7]:
 
 
-file = os.path.join('data', 'raw', 'tp53.muts.txt')
-tp53_status_df = pd.read_table(file)
-print(tp53_status_df.shape)
-tp53_status_df.head(3)
+status_df['Histology.Detailed'].value_counts()
 
 
 # In[8]:
 
 
-len(tp53_status_df.Model.unique())
+pd.crosstab(status_df['Histology.Detailed'], status_df.Hugo_Symbol)
 
 
 # In[9]:
 
 
-tp53_status_df.Hugo_Symbol.value_counts()
+# Obtain a binary status matrix
+full_status_df = pd.crosstab(status_df['Model'], status_df.Hugo_Symbol)
+full_status_df[full_status_df > 1] = 1
+full_status_df = full_status_df.reset_index()
 
 
 # In[10]:
 
 
-tp53_status_df.Variant_Classification.value_counts()
+histology_df = status_df.loc[:, ['Model', 'Histology.Detailed']]
+histology_df.columns = ['Model', 'Histology_Full']
+
+full_status_df = (
+    full_status_df
+    .merge(histology_df, how='left', on="Model")
+    .drop_duplicates()
+    .reset_index(drop=True)
+)
+
+full_status_df.head()
+
+
+# ## Extract Gene Status
+
+# In[11]:
+
+
+# Ras Pathway Alterations
+ras_genes = ['ALK', 'NF1', 'PTPN11', 'BRAF', 'CIC', 'KRAS', 'HRAS', 'NRAS']
+
+full_status_df = (
+    full_status_df
+    .assign(ras_status = full_status_df.loc[:, ras_genes]
+            .max(axis='columns'))
+)
 
 
 # ## Load Clinical Data Information
 # 
 # This stores histology information
 
-# In[11]:
+# In[12]:
 
 
 file = os.path.join('data', 'raw', '2018-05-22-pdx-clinical.txt')
@@ -127,85 +146,80 @@ print(clinical_df.shape)
 clinical_df.head(3)
 
 
-# In[12]:
+# In[13]:
 
 
 clinical_df.Histology.value_counts()
 
 
-# ## Load Predictions
-
-# In[13]:
-
-
-file = os.path.join('results', 'pdx_classifier_scores.tsv')
-scores_df = pd.read_table(file)
-
-print(scores_df.shape)
-scores_df.head(3)
-
+# ## Load Predictions and Merge with Clinical and Alteration Data
 
 # In[14]:
 
 
-scores_df = scores_df.merge(clinical_df, how='left', left_on='sample_id', right_on='Model')
+file = os.path.join('results', 'classifier_scores.tsv')
+scores_df = pd.read_table(file)
+
+scores_df = (
+    scores_df.merge(
+        clinical_df,
+        how='left', left_on='sample_id', right_on='Model'
+    )
+    .merge(
+        full_status_df,
+        how='left', left_on='sample_id', right_on='Model'
+    )
+)
+
 print(scores_df.shape)
-scores_df
+scores_df.head()
 
 
 # In[15]:
 
 
-# Did any gene expression values fail to map to barcodes?
-scores_df.Model.isna().value_counts()
+scores_df = scores_df.assign(tp53_status = scores_df['TP53'])
+scores_df = scores_df.assign(nf1_status = scores_df['NF1'])
 
 
 # In[16]:
 
 
-scores_df = (
-    scores_df.merge(
-        tp53_status_df.loc[:, ['Hugo_Symbol', 'Model']],
-        how='left', left_on='Model', right_on='Model'
-    )
-    .merge(
-        ras_status_df.loc[:, ['Hugo_Symbol', 'Model']],
-        how='left', left_on='Model', right_on='Model',
-        suffixes=('_tp53', '_ras')
-    )
-)
-
-scores_df.head(2)
-
-
-# In[17]:
-
-
-scores_df = scores_df.assign(tp53_status = scores_df['Hugo_Symbol_tp53'])
-scores_df = scores_df.assign(ras_status = scores_df['Hugo_Symbol_ras'])
-
-
-# In[18]:
-
-
-scores_df.loc[:, ['tp53_status', 'ras_status']] = (
-    scores_df.loc[:, ['tp53_status', 'ras_status']].fillna(0)
-)
-
-scores_df.loc[:, ['Hugo_Symbol_tp53', 'Hugo_Symbol_ras']] = (
-    scores_df.loc[:, ['Hugo_Symbol_tp53', 'Hugo_Symbol_ras']].fillna('wild-type')
+gene_status = ['tp53_status', 'ras_status', 'nf1_status']
+scores_df.loc[:, gene_status] = (
+    scores_df.loc[:, gene_status].fillna(0)
 )
 
 scores_df.loc[scores_df['tp53_status'] != 0, 'tp53_status'] = 1
 scores_df.loc[scores_df['ras_status'] != 0, 'ras_status'] = 1
+scores_df.loc[scores_df['nf1_status'] != 0, 'nf1_status'] = 1
 
+scores_df['tp53_status'] = scores_df['tp53_status'].astype(int)
+scores_df['ras_status'] = scores_df['ras_status'].astype(int)
+scores_df['nf1_status'] = scores_df['nf1_status'].astype(int)
+              
 scores_df.head(2)
 
 
-# In[19]:
+# ## Load Histology Color Codes
+
+# In[17]:
 
 
-n_classes = 2
+file = os.path.join('data', '2018-08-23-all-hist-colors.txt')
+color_code_df = pd.read_table(file)
+color_code_df.head(2)
+
+color_dict = dict(zip(color_code_df.Histology, color_code_df.Color))
+color_dict
+
+
+# ## Perform ROC and Precision-Recall Analysis using all Alteration Information
+
+# In[18]:
+
+
+n_classes = 3
 
 fpr_pdx = {}
 tpr_pdx = {}
@@ -222,9 +236,9 @@ auroc_shuff = {}
 aupr_shuff = {}
 
 idx = 0
-for status, score, shuff in zip(('ras_status', 'tp53_status'),
-                                ('ras_score', 'tp53_score'),
-                                ('ras_shuffle', 'tp53_shuffle')):
+for status, score, shuff in zip(('ras_status', 'nf1_status', 'tp53_status'),
+                                ('ras_score', 'nf1_score', 'tp53_score'),
+                                ('ras_shuffle', 'nf1_shuffle', 'tp53_shuffle')):
     
     # Obtain Metrics
     sample_status = scores_df.loc[:, status]
@@ -246,21 +260,21 @@ for status, score, shuff in zip(('ras_status', 'tp53_status'),
     idx += 1
 
 
-# In[20]:
+# In[19]:
 
 
 if not os.path.exists('figures'):
     os.makedirs('figures')
 
 
-# In[21]:
+# In[20]:
 
 
 # Visualize ROC curves
 plt.subplots(figsize=(4, 4))
 
-labels = ['Ras', 'TP53']
-colors = ['#1b9e77', '#d95f02']
+labels = ['Ras', 'NF1', 'TP53']
+colors = ['#1b9e77', '#d95f02', '#7570b3']
 
 for i in range(n_classes):
     plt.plot(fpr_pdx[i], tpr_pdx[i],
@@ -289,11 +303,11 @@ lgd = plt.legend(bbox_to_anchor=(1.03, 0.85),
                  borderaxespad=0.,
                  fontsize=10)
 
-file = os.path.join('figures', 'pdx_classifier_roc_curve.pdf')
-#plt.savefig(file, bbox_extra_artists=(lgd,), bbox_inches='tight')
+file = os.path.join('figures', 'classifier_roc_curve.pdf')
+plt.savefig(file, bbox_extra_artists=(lgd,), bbox_inches='tight')
 
 
-# In[22]:
+# In[21]:
 
 
 # Visualize PR curves
@@ -325,177 +339,88 @@ lgd = plt.legend(bbox_to_anchor=(1.03, 0.85),
                  borderaxespad=0.,
                  fontsize=10)
 
-file = os.path.join('figures', 'pdx_classifier_precision_recall_curve.pdf')
-#plt.savefig(file, bbox_extra_artists=(lgd,), bbox_inches='tight')
+file = os.path.join('figures', 'classifier_precision_recall_curve.pdf')
+plt.savefig(file, bbox_extra_artists=(lgd,), bbox_inches='tight')
+
+
+# ## Perform t-test against status classification
+
+# In[22]:
+
+
+t_results_ras = perform_ttest(scores_df, gene='ras')
+t_results_ras
 
 
 # In[23]:
 
 
-# Output t-test results
-t_results_ras = ttest_ind(a = scores_df.query('ras_status == 1').loc[:, 'ras_score'],
-                          b = scores_df.query('ras_status == 0').loc[:, 'ras_score'],
-                          equal_var = False)
-t_results_ras
+t_results_nf1 = perform_ttest(scores_df, gene='nf1')
+t_results_nf1
 
 
 # In[24]:
 
 
-# Output t-test results
-t_results_tp53 = ttest_ind(a = scores_df.query('tp53_status == 1').loc[:, 'tp53_score'],
-                          b = scores_df.query('tp53_status == 0').loc[:, 'tp53_score'],
-                          equal_var = False)
+t_results_tp53 = perform_ttest(scores_df, gene='tp53')
 t_results_tp53
 
+
+# ## Observe broad differences across sample categories
 
 # In[25]:
 
 
-x1, x2 = 0, 1
-x3, x4 = -0.2, 0.2
-y1, y2, h = 0.98, 1, 0.03
-
-plt.rcParams['figure.figsize']=(3.5, 4)
-ax = sns.boxplot(x="ras_status",
-                 y="ras_score",
-                 data=scores_df,
-                 palette = 'Greys',
-                 fliersize=0)
-
-ax = sns.stripplot(x="ras_status",
-                   y="ras_score",
-                   data=scores_df,
-                   dodge=True,
-                   edgecolor='black',
-                   jitter=0.25,
-                   size=4,
-                   alpha=0.65)
-
-ax.set_ylabel('Classifier Score', fontsize=12)
-ax.set_xlabel('PDX Data', fontsize=12)
-ax.set_xticklabels(['Ras Wild-Type', 'Ras Mutant'])
-
-# Add Ras T-Test Results
-plt.plot([x1, x1, x2, x2], [y1, y1+h, y1+h, y1], lw=1.2, c='black')
-plt.text(.5, y1+h, "{:.2E}".format(Decimal(t_results_ras.pvalue)),
-         ha='center', va='bottom', color="black")
-plt.axhline(linewidth=2, y=0.5, color='black', linestyle='dashed')
-plt.tight_layout()
-
-
-file = os.path.join('figures', 'ras_predictions.pdf')
-plt.savefig(file)
+# Ras
+get_mutant_boxplot(df=scores_df,
+                   gene="Ras",
+                   t_test_results=t_results_ras)
 
 
 # In[26]:
 
 
-x1, x2 = 0, 1
-x3, x4 = -0.2, 0.2
-y1, y2, h = 0.98, 1, 0.03
-
-plt.rcParams['figure.figsize']=(3.5, 4)
-ax = sns.boxplot(x="tp53_status",
-                 y="tp53_score",
-                 data=scores_df,
-                 palette = 'Greys',
-                 fliersize=0)
-
-ax = sns.stripplot(x="tp53_status",
-                   y="tp53_score",
-                   data=scores_df,
-                   dodge=True,
-                   edgecolor='black',
-                   jitter=0.25,
-                   size=4,
-                   alpha=0.65)
-
-ax.set_ylabel('Classifier Score', fontsize=12)
-ax.set_xlabel('PDX Data', fontsize=12)
-ax.set_xticklabels(['TP53 Wild-Type', 'TP53 Mutant'])
-
-# Add Ras T-Test Results
-plt.plot([x1, x1, x2, x2], [y1, y1+h, y1+h, y1], lw=1.2, c='black')
-plt.text(.5, y1+h, "{:.2E}".format(Decimal(t_results_tp53.pvalue)),
-         ha='center', va='bottom', color="black")
-plt.axhline(linewidth=2, y=0.5, color='black', linestyle='dashed');
-plt.tight_layout()
-
-file = os.path.join('figures', 'tp53_predictions.pdf')
-plt.savefig(file)
+# NF1
+get_mutant_boxplot(df=scores_df,
+                   gene="NF1",
+                   t_test_results=t_results_nf1)
 
 
 # In[27]:
 
 
-ax = sns.boxplot(x="ras_status",
-                 y="ras_score",
-                 data=scores_df,
-                 hue='Histology',
-                 palette = 'Greys',
-                 fliersize=0)
-
-ax = sns.stripplot(x="ras_status",
-                   y="ras_score",
-                   data=scores_df,
-                   hue='Histology', 
-                   dodge=True,
-                   edgecolor='black',
-                   jitter=0.25,
-                   size=4,
-                   alpha=0.65)
-
-ax.set_ylabel('Classifier Score', fontsize=12)
-ax.set_xlabel('Ras Status', fontsize=12)
-plt.axhline(linewidth=2, y=0.5, color='black', linestyle='dashed')
-
-handles, labels = ax.get_legend_handles_labels()
-lgd = plt.legend(handles[15:31], labels[15:31],
-               bbox_to_anchor=(1.03, 1),
-                 loc=2,
-                 borderaxespad=0.,
-                 fontsize=10)
-
-lgd.set_title("Histology")
-
-file = os.path.join('figures', 'ras_predictions_histology.pdf')
-plt.savefig(file, bbox_extra_artists=(lgd,), bbox_inches='tight')
+# TP53
+get_mutant_boxplot(df=scores_df,
+                   gene="TP53",
+                   t_test_results=t_results_tp53)
 
 
 # In[28]:
 
 
-ax = sns.boxplot(x="tp53_status",
-                 y="tp53_score",
-                 data=scores_df,
-                 hue='Histology',
-                 palette = 'Greys',
-                 fliersize=0)
+# Ras Alterations
+get_mutant_boxplot(df=scores_df,
+                   gene='Ras',
+                   histology=True,
+                   hist_color_dict=color_dict)
 
-ax = sns.stripplot(x="tp53_status",
-                   y="tp53_score",
-                   data=scores_df,
-                   hue='Histology', 
-                   dodge=True,
-                   edgecolor='black',
-                   jitter=0.25,
-                   size=4,
-                   alpha=0.65)
 
-ax.set_ylabel('Classifier Score', fontsize=12)
-ax.set_xlabel('TP53 Status', fontsize=12)
-plt.axhline(linewidth=2, y=0.5, color='black', linestyle='dashed')
+# In[29]:
 
-handles, labels = ax.get_legend_handles_labels()
-lgd = plt.legend(handles[15:31], labels[15:31],
-               bbox_to_anchor=(1.03, 1),
-                 loc=2,
-                 borderaxespad=0.,
-                 fontsize=10)
 
-lgd.set_title("Histology")
+# NF1 Alterations
+get_mutant_boxplot(df=scores_df,
+                   gene='NF1',
+                   histology=True,
+                   hist_color_dict=color_dict)
 
-file = os.path.join('figures', 'tp53_predictions_histology.pdf')
-plt.savefig(file, bbox_extra_artists=(lgd,), bbox_inches='tight')
+
+# In[30]:
+
+
+# TP53 Alterations
+get_mutant_boxplot(df=scores_df,
+                   gene='TP53',
+                   histology=True,
+                   hist_color_dict=color_dict)
 
