@@ -5,21 +5,21 @@
 # 
 # **Gregory Way, 2018**
 # 
-# In the following notebook, I apply two distinct classifiers to patient derived xenograft (PDX) RNAseq data (FPKM).
-# The first classifier detects Ras activation. For more details about the algorithm and results, refer to [Way et al. 2018](https://doi.org/10.1016/j.celrep.2018.03.046 \"Machine Learning Detects Pan-cancer Ras Pathway Activation in The Cancer Genome Atlas\"). I also include _TP53_ inactivation predictions. This classifier was previously applied in [Knijnenburg et al. 2018](https://doi.org/10.1016/j.celrep.2018.03.076 \"Genomic and Molecular Landscape of DNA Damage Repair Deficiency across The Cancer Genome Atlas\").
+# In the following notebook, I apply three distinct classifiers to patient derived xenograft (PDX) RNAseq data (FPKM).
+# The first classifier detects Ras activation. For more details about the algorithm and results, refer to [Way et al. 2018](https://doi.org/10.1016/j.celrep.2018.03.046 "Machine Learning Detects Pan-cancer Ras Pathway Activation in The Cancer Genome Atlas"). I also include _TP53_ inactivation predictions. This classifier was previously applied in [Knijnenburg et al. 2018](https://doi.org/10.1016/j.celrep.2018.03.076 "Genomic and Molecular Landscape of DNA Damage Repair Deficiency across The Cancer Genome Atlas"). The third is a classifier that predicts _NF1_ inactivation. We previously applied this in [Way et al. 2017](https://doi.org/10.1186/s12864-017-3519-7 "A machine learning classifier trained on cancer transcriptomes detects NF1 inactivation signal in glioblastoma").
 # 
-# To apply other classifiers (targetting other genes of interest) refer to https://github.com/greenelab/pancancer.
+# To apply other classifiers (targeting other genes of interest) refer to https://github.com/greenelab/pancancer.
 # 
 # Also note that we have implemented classifiers on a larger scale and made the models accessible to non-computational biologists (see [Project Cognoma](http://cognoma.org)).
 # 
 # ## Procedure
 # 
-# 1. Load PDX RNAseq matrix (`.RDS`)
-#   * The matrix is in `sample` x `gene symbol` format (232 x 51,968)
+# 1. Load RNAseq matrix (`.RDS`)
+#   * The matrix is in `sample` x `gene symbol` format (250 x 51,968)
 # 2. Process matrix
 #   * Take the z-score by gene
 # 3. Load classifier coefficients
-#   * For both Ras and _TP53_ classifiers
+#   * For both _Ras_, _TP53_, and _NF1_ classifiers
 # 4. Apply each classifier to the input data
 #   * This also requires additional processing steps to the input data (subsetting to the respective classifier genes)
 #   * Also note that not all genes are present in the input RNAseq genes.
@@ -27,11 +27,11 @@
 # 
 # ### Important Caveat
 # 
-# Because not all of the classifier genes are found in the input dataset, the classifier probability is not calibrated correctly. The scores should be interpreted as continuous values representing relative Ras activation, and not as a pure probability estimate.
+# Because not all of the classifier genes are found in the input dataset, the classifier probability is not calibrated correctly. The scores should be interpreted as continuous values representing relative gene alterations, and not as a pure probability estimate.
 # 
 # ## Output
 # 
-# The output of this notebook are the predicted scores for both classifiers across all 232 samples for real data and shuffled data. This is in the form of a single text file with three columns (`sample_id`, `ras_score`, `tp53_score`,  `ras_shuffle`, `tp53_shuffle`).
+# The output of this notebook are the predicted scores for both classifiers across all samples for real data and shuffled data. This is in the form of a single text file with three columns (`sample_id`, `ras_score`, `tp53_score`, `nf1_score`,  `ras_shuffle`, `tp53_shuffle`, `nf1_shuffle`).
 
 # In[1]:
 
@@ -66,8 +66,18 @@ readRDS = robjects.r['readRDS']
 # In[4]:
 
 
+# Make results directory
+try:
+    os.makedirs('./results')
+except OSError:
+    pass
+
+
+# In[5]:
+
+
 # Load PDX gene expression data in RDS format
-file = os.path.join('data', 'raw', 'PPTC_FPKM_matrix_withModelID.RDS')
+file = os.path.join('data', 'raw', '2018-08-24-PPTC_FPKM_matrix_withModelID-250.RDS')
 
 exprs_rds = readRDS(file)
 exprs_df = pandas2ri.ri2py(exprs_rds).set_index('gene_short_name').transpose()
@@ -76,7 +86,7 @@ print(exprs_df.shape)
 exprs_df.head(3)
 
 
-# In[5]:
+# In[6]:
 
 
 # Transform the gene expression data (z-score by gene)
@@ -87,7 +97,7 @@ exprs_scaled_df = pd.DataFrame(scaled_fit.transform(exprs_df),
 exprs_scaled_df.head()
 
 
-# In[6]:
+# In[7]:
 
 
 # Shuffle input RNAseq matrix and apply classifiers
@@ -96,7 +106,7 @@ exprs_shuffled_df = exprs_scaled_df.apply(shuffle_columns, axis=0)
 
 # ## Apply Ras Classifier
 
-# In[7]:
+# In[8]:
 
 
 # Load RAS Classifier
@@ -108,7 +118,7 @@ print(ras_coef_df.shape)
 ras_coef_df.head()
 
 
-# In[8]:
+# In[9]:
 
 
 # Apply the Ras classifier to the input RNAseq matrix
@@ -117,7 +127,7 @@ ras_scores_df, ras_common_genes_df, ras_missing_genes_df = (
 )
 
 
-# In[9]:
+# In[10]:
 
 
 # Determine the extent of coefficient overlap
@@ -127,14 +137,14 @@ print('There are a total of {} out of {} genes in common ({}%) between the datas
               round(ras_common_genes_df.shape[0] / ras_coef_df.shape[0] * 100, 2)))
 
 
-# In[10]:
+# In[11]:
 
 
 # Which Genes are Missing?
 ras_missing_genes_df
 
 
-# In[11]:
+# In[12]:
 
 
 # Distribution of predictions of the Ras Classifier applied to input data
@@ -143,7 +153,7 @@ ras_scores_df.T.hist(bins=30);
 
 # ### Apply Ras Classifier to Shuffled Data
 
-# In[12]:
+# In[13]:
 
 
 # Apply the Ras classifier to the input RNAseq matrix 
@@ -154,7 +164,7 @@ ras_shuffle_scores_df, ras_shuffle_common_genes_df, ras_shuffle_missing_genes_df
 
 # ## Apply TP53 Classifier
 
-# In[13]:
+# In[14]:
 
 
 # Load RAS Classifier
@@ -166,7 +176,7 @@ print(tp53_coef_df.shape)
 tp53_coef_df.head()
 
 
-# In[14]:
+# In[15]:
 
 
 # Apply the TP53 classifier to the input RNAseq matrix
@@ -175,7 +185,7 @@ tp53_scores_df, tp53_common_genes_df, tp53_missing_genes_df = (
 )
 
 
-# In[15]:
+# In[16]:
 
 
 # Determine the extent of coefficient overlap
@@ -185,14 +195,14 @@ print('There are a total of {} out of {} genes in common ({}%) between the datas
               round(tp53_common_genes_df.shape[0] / tp53_coef_df.shape[0] * 100, 2)))
 
 
-# In[16]:
+# In[17]:
 
 
 # Which Genes are Missing?
 tp53_missing_genes_df
 
 
-# In[17]:
+# In[18]:
 
 
 # Distribution of predictions of the TP53 Classifier applied to input data
@@ -201,7 +211,7 @@ tp53_scores_df.T.hist(bins=30);
 
 # ### Apply TP53 Classifier to Shuffled Data
 
-# In[18]:
+# In[19]:
 
 
 # Apply the Ras classifier to the input RNAseq matrix 
@@ -210,23 +220,85 @@ tp53_shuffle_scores_df, tp53_shuffle_common_genes_df, tp53_shuffle_missing_genes
 )
 
 
+# ## Apply NF1 Classifier
+
+# In[20]:
+
+
+# Load NF1 Classifier
+file = os.path.join('data', 'nf1_classifier_coefficients.tsv')
+nf1_coef_df = pd.read_table(file, index_col=0)
+nf1_coef_df = nf1_coef_df.query('abs_val > 0')
+
+print(nf1_coef_df.shape)
+nf1_coef_df.head()
+
+
+# In[21]:
+
+
+# Apply the NF1 classifier to the input RNAseq matrix
+nf1_scores_df, nf1_common_genes_df, nf1_missing_genes_df = (
+    apply_classifier(coef_df=nf1_coef_df, rnaseq_df=exprs_scaled_df)
+)
+
+
+# In[22]:
+
+
+# Determine the extent of coefficient overlap
+print('There are a total of {} out of {} genes in common ({}%) between the datasets'
+      .format(nf1_common_genes_df.shape[0],
+              nf1_coef_df.shape[0],
+              round(nf1_common_genes_df.shape[0] / nf1_coef_df.shape[0] * 100, 2)))
+
+
+# In[23]:
+
+
+# Which Genes are Missing?
+nf1_missing_genes_df
+
+
+# In[24]:
+
+
+# Distribution of predictions of the NF1 Classifier applied to input data
+nf1_scores_df.T.hist(bins=30);
+
+
+# ### Apply NF1 Classifier to Shuffled Data
+
+# In[25]:
+
+
+# Apply the NF1 classifier to the input RNAseq matrix 
+nf1_shuffle_scores_df, nf1_shuffle_common_genes_df, nf1_shuffle_missing_genes_df = (
+    apply_classifier(coef_df=nf1_coef_df, rnaseq_df=exprs_shuffled_df)
+)
+
+
 # ## Combine Ras and TP53 predictions and output to file
 
-# In[19]:
+# In[26]:
 
 
-results_list = [ras_scores_df.T, tp53_scores_df.T, ras_shuffle_scores_df.T, tp53_shuffle_scores_df.T]
+results_list = [ras_scores_df.T, tp53_scores_df.T, nf1_scores_df.T,
+                ras_shuffle_scores_df.T, tp53_shuffle_scores_df.T,
+                nf1_shuffle_scores_df.T]
+
 all_results = pd.concat(results_list, axis='columns').reset_index()
-all_results.columns = ['sample_id', 'ras_score', 'tp53_score', 'ras_shuffle', 'tp53_shuffle']
+all_results.columns = ['sample_id', 'ras_score', 'tp53_score', 'nf1_score',
+                       'ras_shuffle', 'tp53_shuffle', 'nf1_shuffle']
 
-file = os.path.join('results', 'pdx_classifier_scores.tsv')
+file = os.path.join('results', 'classifier_scores.tsv')
 all_results.to_csv(file, sep='\t', index=False)
 
 all_results.head()
 
 
-# In[20]:
+# In[27]:
 
 
-all_results.plot(kind='scatter', x='ras_score', y='tp53_score');
+all_results.plot(kind='scatter', x='ras_score', y='nf1_score');
 
