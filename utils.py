@@ -123,18 +123,18 @@ def get_mutant_boxplot(df, gene, t_test_results=None, histology=False,
     if histology:
         output_file = os.path.join('figures',
                                    'histology_{}_predictions.pdf'.format(gene))
-        plt.rcParams['figure.figsize'] = (8, 4)
+        plt.rcParams['figure.figsize'] = (9, 4)
         ax = sns.boxplot(x=x,
                          y=y,
                          data=df,
-                         hue='Histology_Full',
+                         hue='diagnosis_recode',
                          color='white',
                          fliersize=0)
 
         ax = sns.stripplot(x=x,
                            y=y,
                            data=df,
-                           hue='Histology_Full',
+                           hue='diagnosis_recode',
                            palette=hist_color_dict,
                            dodge=True,
                            edgecolor='black',
@@ -144,7 +144,8 @@ def get_mutant_boxplot(df, gene, t_test_results=None, histology=False,
 
         handles, labels = ax.get_legend_handles_labels()
 
-        lgd = plt.legend(handles[19:41], labels[19:41],
+        lgd = plt.legend(handles[24:50], labels[24:50],
+                         ncol=2,
                          bbox_to_anchor=(1.03, 1),
                          loc=2,
                          borderaxespad=0.,
@@ -184,3 +185,118 @@ def get_mutant_boxplot(df, gene, t_test_results=None, histology=False,
     plt.tight_layout()
     plt.savefig(output_file)
     plt.show()
+
+
+def vis_classifier_scores(df, gene, confidence_color_dict, rcparam=(6, 4),
+                          variant_plot=False):
+    """
+    Build boxplot of classifier scores stratified by gene confidence scores
+
+    Arguments:
+    df - the dataframe of scores
+    gene - the name of the gene to input
+    confidence_color_dict - a dict storing hex colors for confidence levels
+    variant_plot - boolean if the x axis should be variant classifications
+    """
+    import os
+    import matplotlib.pyplot as plt
+    import seaborn as sns
+
+    lower_gene = gene.lower()
+
+    if lower_gene not in ['ras', 'nf1', 'tp53']:
+        raise ValueError('Enter either "Ras", "NF1", or "TP53" as the gene')
+
+    y = '{}_score'.format(lower_gene)
+    ylabel = '{} Classifier Score'.format(gene)
+    output_file = os.path.join('figures',
+                               '{}_confidence_scores.pdf'.format(gene))
+
+    plt.rcParams['figure.figsize'] = rcparam
+    ax = sns.boxplot(x='Hugo_Symbol',
+                     y=y,
+                     data=df,
+                     hue='Confidence',
+                     color='white',
+                     hue_order=['high', 'low', 'unknown', 'wild-type'],
+                     fliersize=0)
+
+    ax = sns.stripplot(x='Hugo_Symbol',
+                       y=y,
+                       data=df,
+                       hue='Confidence',
+                       hue_order=['high', 'low', 'unknown', 'wild-type'],
+                       dodge=True,
+                       palette=confidence_color_dict,
+                       edgecolor='black',
+                       jitter=0.25,
+                       size=4,
+                       alpha=0.65)
+
+    ax.set_ylim([0, 1])
+    ax.set_ylabel(ylabel, fontsize=12)
+    ax.set_xlabel('Genes', fontsize=12)
+    handles, labels = ax.get_legend_handles_labels()
+
+    plt.legend(handles[4:8], labels[4:8],
+               ncol=1,
+               bbox_to_anchor=(1.03, 1),
+               loc=2,
+               borderaxespad=0.,
+               fontsize=10)
+
+    plt.axhline(linewidth=2, y=0.5, color='black', linestyle='dashed')
+    plt.tight_layout()
+    plt.savefig(output_file)
+    plt.show()
+
+
+def extract_outliers(df, gene):
+    """
+    Extract positive and negative outliers in score dataframes
+
+    Arguments:
+    df - the gene specific scores dataframe
+    gene - the gene of interest
+
+    Output:
+    A summary dataframe of samples predicted incorrectly
+    """
+    import pandas as pd
+
+    lower_gene = gene.lower()
+
+    if lower_gene not in ['ras', 'nf1', 'tp53']:
+        raise ValueError('Enter either "Ras", "NF1", or "TP53" as the gene')
+
+    score = '{}_score'.format(lower_gene)
+
+    # Obtain false positives and false negatives
+    false_negatives = (
+        df
+        .query('Confidence != "wild-type"')
+        .sort_values(by=score, ascending=False)
+        .iloc[:, 0:3]
+    )
+    false_negatives = false_negatives[false_negatives[score] < 0.5]
+
+    false_positives = (
+        df
+        .query('Confidence == "wild-type"')
+        .sort_values(by=score, ascending=False)
+        .iloc[:, 0:3]
+    )
+    false_positives = false_positives[false_positives[score] >= 0.5]
+
+    col_names = ['sample_id', 'classifier_score', 'histology']
+    false_negatives.columns = col_names
+    false_positives.columns = col_names
+
+    false_negatives = false_negatives.assign(hugo_symbol=gene,
+                                             true_status='altered')
+    false_positives = false_positives.assign(hugo_symbol=gene,
+                                             true_status='wild-type')
+
+    # Combine incorrect predictions and output
+    outliers_df = pd.concat([false_negatives, false_positives], axis='rows')
+    return outliers_df.sort_values(by='classifier_score', ascending=False)
