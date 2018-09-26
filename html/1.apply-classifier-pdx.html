@@ -11848,6 +11848,19 @@ The first classifier detects Ras activation. For more details about the algorith
 <div class="prompt input_prompt">In&nbsp;[3]:</div>
 <div class="inner_cell">
     <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">123</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[4]:</div>
+<div class="inner_cell">
+    <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">pandas2ri</span><span class="o">.</span><span class="n">activate</span><span class="p">()</span>
 <span class="n">readRDS</span> <span class="o">=</span> <span class="n">robjects</span><span class="o">.</span><span class="n">r</span><span class="p">[</span><span class="s1">&#39;readRDS&#39;</span><span class="p">]</span>
 </pre></div>
@@ -11859,7 +11872,7 @@ The first classifier detects Ras activation. For more details about the algorith
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[4]:</div>
+<div class="prompt input_prompt">In&nbsp;[5]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Make results directory</span>
@@ -11876,7 +11889,7 @@ The first classifier detects Ras activation. For more details about the algorith
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[5]:</div>
+<div class="prompt input_prompt">In&nbsp;[6]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Load PDX gene expression data in RDS format</span>
@@ -11910,7 +11923,7 @@ The first classifier detects Ras activation. For more details about the algorith
 
 <div class="output_area">
 
-<div class="prompt output_prompt">Out[5]:</div>
+<div class="prompt output_prompt">Out[6]:</div>
 
 
 
@@ -12043,7 +12056,7 @@ The first classifier detects Ras activation. For more details about the algorith
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[6]:</div>
+<div class="prompt input_prompt">In&nbsp;[7]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Transform the gene expression data (z-score by gene)</span>
@@ -12064,7 +12077,7 @@ The first classifier detects Ras activation. For more details about the algorith
 
 <div class="output_area">
 
-<div class="prompt output_prompt">Out[6]:</div>
+<div class="prompt output_prompt">Out[7]:</div>
 
 
 
@@ -12245,7 +12258,7 @@ The first classifier detects Ras activation. For more details about the algorith
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[7]:</div>
+<div class="prompt input_prompt">In&nbsp;[8]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Shuffle input RNAseq matrix and apply classifiers</span>
@@ -12267,7 +12280,7 @@ The first classifier detects Ras activation. For more details about the algorith
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[8]:</div>
+<div class="prompt input_prompt">In&nbsp;[9]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Load RAS Classifier</span>
@@ -12300,7 +12313,7 @@ The first classifier detects Ras activation. For more details about the algorith
 
 <div class="output_area">
 
-<div class="prompt output_prompt">Out[8]:</div>
+<div class="prompt output_prompt">Out[9]:</div>
 
 
 
@@ -12372,7 +12385,7 @@ The first classifier detects Ras activation. For more details about the algorith
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[9]:</div>
+<div class="prompt input_prompt">In&nbsp;[10]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Apply the Ras classifier to the input RNAseq matrix</span>
@@ -12388,7 +12401,7 @@ The first classifier detects Ras activation. For more details about the algorith
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[10]:</div>
+<div class="prompt input_prompt">In&nbsp;[11]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Determine the extent of coefficient overlap</span>
@@ -12423,7 +12436,7 @@ The first classifier detects Ras activation. For more details about the algorith
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[11]:</div>
+<div class="prompt input_prompt">In&nbsp;[12]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Which Genes are Missing?</span>
@@ -12440,7 +12453,7 @@ The first classifier detects Ras activation. For more details about the algorith
 
 <div class="output_area">
 
-<div class="prompt output_prompt">Out[11]:</div>
+<div class="prompt output_prompt">Out[12]:</div>
 
 
 
@@ -12554,7 +12567,7 @@ The first classifier detects Ras activation. For more details about the algorith
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[12]:</div>
+<div class="prompt input_prompt">In&nbsp;[13]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Distribution of predictions of the Ras Classifier applied to input data</span>
@@ -12598,7 +12611,7 @@ The first classifier detects Ras activation. For more details about the algorith
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[13]:</div>
+<div class="prompt input_prompt">In&nbsp;[14]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Apply the Ras classifier to the input RNAseq matrix </span>
@@ -12622,7 +12635,7 @@ The first classifier detects Ras activation. For more details about the algorith
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[14]:</div>
+<div class="prompt input_prompt">In&nbsp;[15]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Load RAS Classifier</span>
@@ -12655,7 +12668,7 @@ The first classifier detects Ras activation. For more details about the algorith
 
 <div class="output_area">
 
-<div class="prompt output_prompt">Out[14]:</div>
+<div class="prompt output_prompt">Out[15]:</div>
 
 
 
@@ -12727,7 +12740,7 @@ The first classifier detects Ras activation. For more details about the algorith
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[15]:</div>
+<div class="prompt input_prompt">In&nbsp;[16]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Apply the TP53 classifier to the input RNAseq matrix</span>
@@ -12743,7 +12756,7 @@ The first classifier detects Ras activation. For more details about the algorith
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[16]:</div>
+<div class="prompt input_prompt">In&nbsp;[17]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Determine the extent of coefficient overlap</span>
@@ -12778,7 +12791,7 @@ The first classifier detects Ras activation. For more details about the algorith
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[17]:</div>
+<div class="prompt input_prompt">In&nbsp;[18]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Which Genes are Missing?</span>
@@ -12795,7 +12808,7 @@ The first classifier detects Ras activation. For more details about the algorith
 
 <div class="output_area">
 
-<div class="prompt output_prompt">Out[17]:</div>
+<div class="prompt output_prompt">Out[18]:</div>
 
 
 
@@ -12945,7 +12958,7 @@ The first classifier detects Ras activation. For more details about the algorith
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[18]:</div>
+<div class="prompt input_prompt">In&nbsp;[19]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Distribution of predictions of the TP53 Classifier applied to input data</span>
@@ -12989,7 +13002,7 @@ The first classifier detects Ras activation. For more details about the algorith
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[19]:</div>
+<div class="prompt input_prompt">In&nbsp;[20]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Apply the Ras classifier to the input RNAseq matrix </span>
@@ -13013,7 +13026,7 @@ The first classifier detects Ras activation. For more details about the algorith
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[20]:</div>
+<div class="prompt input_prompt">In&nbsp;[21]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Load NF1 Classifier</span>
@@ -13046,7 +13059,7 @@ The first classifier detects Ras activation. For more details about the algorith
 
 <div class="output_area">
 
-<div class="prompt output_prompt">Out[20]:</div>
+<div class="prompt output_prompt">Out[21]:</div>
 
 
 
@@ -13118,7 +13131,7 @@ The first classifier detects Ras activation. For more details about the algorith
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[21]:</div>
+<div class="prompt input_prompt">In&nbsp;[22]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Apply the NF1 classifier to the input RNAseq matrix</span>
@@ -13134,7 +13147,7 @@ The first classifier detects Ras activation. For more details about the algorith
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[22]:</div>
+<div class="prompt input_prompt">In&nbsp;[23]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Determine the extent of coefficient overlap</span>
@@ -13169,7 +13182,7 @@ The first classifier detects Ras activation. For more details about the algorith
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[23]:</div>
+<div class="prompt input_prompt">In&nbsp;[24]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Which Genes are Missing?</span>
@@ -13186,7 +13199,7 @@ The first classifier detects Ras activation. For more details about the algorith
 
 <div class="output_area">
 
-<div class="prompt output_prompt">Out[23]:</div>
+<div class="prompt output_prompt">Out[24]:</div>
 
 
 
@@ -13240,7 +13253,7 @@ The first classifier detects Ras activation. For more details about the algorith
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[24]:</div>
+<div class="prompt input_prompt">In&nbsp;[25]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Distribution of predictions of the NF1 Classifier applied to input data</span>
@@ -13284,7 +13297,7 @@ The first classifier detects Ras activation. For more details about the algorith
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[25]:</div>
+<div class="prompt input_prompt">In&nbsp;[26]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Apply the NF1 classifier to the input RNAseq matrix </span>
@@ -13308,7 +13321,7 @@ The first classifier detects Ras activation. For more details about the algorith
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[26]:</div>
+<div class="prompt input_prompt">In&nbsp;[27]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">results_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">ras_scores_df</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">tp53_scores_df</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">nf1_scores_df</span><span class="o">.</span><span class="n">T</span><span class="p">,</span>
@@ -13335,7 +13348,7 @@ The first classifier detects Ras activation. For more details about the algorith
 
 <div class="output_area">
 
-<div class="prompt output_prompt">Out[26]:</div>
+<div class="prompt output_prompt">Out[27]:</div>
 
 
 
@@ -13374,9 +13387,9 @@ The first classifier detects Ras activation. For more details about the algorith
       <td>0.516375</td>
       <td>0.447161</td>
       <td>0.512023</td>
-      <td>0.606198</td>
-      <td>0.403821</td>
-      <td>0.460677</td>
+      <td>0.611255</td>
+      <td>0.093347</td>
+      <td>0.520035</td>
     </tr>
     <tr>
       <th>1</th>
@@ -13384,9 +13397,9 @@ The first classifier detects Ras activation. For more details about the algorith
       <td>0.406924</td>
       <td>0.537289</td>
       <td>0.452825</td>
-      <td>0.337734</td>
-      <td>0.504495</td>
-      <td>0.317296</td>
+      <td>0.514608</td>
+      <td>0.568458</td>
+      <td>0.350811</td>
     </tr>
     <tr>
       <th>2</th>
@@ -13394,9 +13407,9 @@ The first classifier detects Ras activation. For more details about the algorith
       <td>0.437307</td>
       <td>0.380876</td>
       <td>0.419952</td>
-      <td>0.417785</td>
-      <td>0.357788</td>
-      <td>0.531761</td>
+      <td>0.601879</td>
+      <td>0.597706</td>
+      <td>0.512053</td>
     </tr>
     <tr>
       <th>3</th>
@@ -13404,9 +13417,9 @@ The first classifier detects Ras activation. For more details about the algorith
       <td>0.370617</td>
       <td>0.444103</td>
       <td>0.458372</td>
-      <td>0.282998</td>
-      <td>0.787167</td>
-      <td>0.510074</td>
+      <td>0.358576</td>
+      <td>0.600465</td>
+      <td>0.446506</td>
     </tr>
     <tr>
       <th>4</th>
@@ -13414,9 +13427,9 @@ The first classifier detects Ras activation. For more details about the algorith
       <td>0.435229</td>
       <td>0.460351</td>
       <td>0.455453</td>
-      <td>0.382302</td>
-      <td>0.400632</td>
-      <td>0.568062</td>
+      <td>0.706013</td>
+      <td>0.584507</td>
+      <td>0.419284</td>
     </tr>
   </tbody>
 </table>
@@ -13431,7 +13444,7 @@ The first classifier detects Ras activation. For more details about the algorith
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[27]:</div>
+<div class="prompt input_prompt">In&nbsp;[28]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">all_results</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">kind</span><span class="o">=</span><span class="s1">&#39;scatter&#39;</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="s1">&#39;ras_score&#39;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s1">&#39;nf1_score&#39;</span><span class="p">);</span>

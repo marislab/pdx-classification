@@ -59,11 +59,17 @@ get_ipython().run_line_magic('matplotlib', 'inline')
 # In[3]:
 
 
+np.random.seed(123)
+
+
+# In[4]:
+
+
 pandas2ri.activate()
 readRDS = robjects.r['readRDS']
 
 
-# In[4]:
+# In[5]:
 
 
 # Make results directory
@@ -73,7 +79,7 @@ except OSError:
     pass
 
 
-# In[5]:
+# In[6]:
 
 
 # Load PDX gene expression data in RDS format
@@ -86,7 +92,7 @@ print(exprs_df.shape)
 exprs_df.head(3)
 
 
-# In[6]:
+# In[7]:
 
 
 # Transform the gene expression data (z-score by gene)
@@ -97,7 +103,7 @@ exprs_scaled_df = pd.DataFrame(scaled_fit.transform(exprs_df),
 exprs_scaled_df.head()
 
 
-# In[7]:
+# In[8]:
 
 
 # Shuffle input RNAseq matrix and apply classifiers
@@ -106,7 +112,7 @@ exprs_shuffled_df = exprs_scaled_df.apply(shuffle_columns, axis=0)
 
 # ## Apply Ras Classifier
 
-# In[8]:
+# In[9]:
 
 
 # Load RAS Classifier
@@ -118,7 +124,7 @@ print(ras_coef_df.shape)
 ras_coef_df.head()
 
 
-# In[9]:
+# In[10]:
 
 
 # Apply the Ras classifier to the input RNAseq matrix
@@ -127,7 +133,7 @@ ras_scores_df, ras_common_genes_df, ras_missing_genes_df = (
 )
 
 
-# In[10]:
+# In[11]:
 
 
 # Determine the extent of coefficient overlap
@@ -137,14 +143,14 @@ print('There are a total of {} out of {} genes in common ({}%) between the datas
               round(ras_common_genes_df.shape[0] / ras_coef_df.shape[0] * 100, 2)))
 
 
-# In[11]:
+# In[12]:
 
 
 # Which Genes are Missing?
 ras_missing_genes_df
 
 
-# In[12]:
+# In[13]:
 
 
 # Distribution of predictions of the Ras Classifier applied to input data
@@ -153,7 +159,7 @@ ras_scores_df.T.hist(bins=30);
 
 # ### Apply Ras Classifier to Shuffled Data
 
-# In[13]:
+# In[14]:
 
 
 # Apply the Ras classifier to the input RNAseq matrix 
@@ -164,7 +170,7 @@ ras_shuffle_scores_df, ras_shuffle_common_genes_df, ras_shuffle_missing_genes_df
 
 # ## Apply TP53 Classifier
 
-# In[14]:
+# In[15]:
 
 
 # Load RAS Classifier
@@ -176,7 +182,7 @@ print(tp53_coef_df.shape)
 tp53_coef_df.head()
 
 
-# In[15]:
+# In[16]:
 
 
 # Apply the TP53 classifier to the input RNAseq matrix
@@ -185,7 +191,7 @@ tp53_scores_df, tp53_common_genes_df, tp53_missing_genes_df = (
 )
 
 
-# In[16]:
+# In[17]:
 
 
 # Determine the extent of coefficient overlap
@@ -195,14 +201,14 @@ print('There are a total of {} out of {} genes in common ({}%) between the datas
               round(tp53_common_genes_df.shape[0] / tp53_coef_df.shape[0] * 100, 2)))
 
 
-# In[17]:
+# In[18]:
 
 
 # Which Genes are Missing?
 tp53_missing_genes_df
 
 
-# In[18]:
+# In[19]:
 
 
 # Distribution of predictions of the TP53 Classifier applied to input data
@@ -211,7 +217,7 @@ tp53_scores_df.T.hist(bins=30);
 
 # ### Apply TP53 Classifier to Shuffled Data
 
-# In[19]:
+# In[20]:
 
 
 # Apply the Ras classifier to the input RNAseq matrix 
@@ -222,7 +228,7 @@ tp53_shuffle_scores_df, tp53_shuffle_common_genes_df, tp53_shuffle_missing_genes
 
 # ## Apply NF1 Classifier
 
-# In[20]:
+# In[21]:
 
 
 # Load NF1 Classifier
@@ -234,7 +240,7 @@ print(nf1_coef_df.shape)
 nf1_coef_df.head()
 
 
-# In[21]:
+# In[22]:
 
 
 # Apply the NF1 classifier to the input RNAseq matrix
@@ -243,7 +249,7 @@ nf1_scores_df, nf1_common_genes_df, nf1_missing_genes_df = (
 )
 
 
-# In[22]:
+# In[23]:
 
 
 # Determine the extent of coefficient overlap
@@ -253,14 +259,14 @@ print('There are a total of {} out of {} genes in common ({}%) between the datas
               round(nf1_common_genes_df.shape[0] / nf1_coef_df.shape[0] * 100, 2)))
 
 
-# In[23]:
+# In[24]:
 
 
 # Which Genes are Missing?
 nf1_missing_genes_df
 
 
-# In[24]:
+# In[25]:
 
 
 # Distribution of predictions of the NF1 Classifier applied to input data
@@ -269,7 +275,7 @@ nf1_scores_df.T.hist(bins=30);
 
 # ### Apply NF1 Classifier to Shuffled Data
 
-# In[25]:
+# In[26]:
 
 
 # Apply the NF1 classifier to the input RNAseq matrix 
@@ -280,7 +286,7 @@ nf1_shuffle_scores_df, nf1_shuffle_common_genes_df, nf1_shuffle_missing_genes_df
 
 # ## Combine Ras and TP53 predictions and output to file
 
-# In[26]:
+# In[27]:
 
 
 results_list = [ras_scores_df.T, tp53_scores_df.T, nf1_scores_df.T,
@@ -297,7 +303,7 @@ all_results.to_csv(file, sep='\t', index=False)
 all_results.head()
 
 
-# In[27]:
+# In[28]:
 
 
 all_results.plot(kind='scatter', x='ras_score', y='nf1_score');
