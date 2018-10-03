@@ -127,14 +127,14 @@ def get_mutant_boxplot(df, gene, t_test_results=None, histology=False,
         ax = sns.boxplot(x=x,
                          y=y,
                          data=df,
-                         hue='diagnosis_recode',
+                         hue='Histology-Detailed',
                          color='white',
                          fliersize=0)
 
         ax = sns.stripplot(x=x,
                            y=y,
                            data=df,
-                           hue='diagnosis_recode',
+                           hue='Histology-Detailed',
                            palette=hist_color_dict,
                            dodge=True,
                            edgecolor='black',
@@ -144,7 +144,7 @@ def get_mutant_boxplot(df, gene, t_test_results=None, histology=False,
 
         handles, labels = ax.get_legend_handles_labels()
 
-        lgd = plt.legend(handles[24:50], labels[24:50],
+        lgd = plt.legend(handles[25:50], labels[25:50],
                          ncol=2,
                          bbox_to_anchor=(1.03, 1),
                          loc=2,
