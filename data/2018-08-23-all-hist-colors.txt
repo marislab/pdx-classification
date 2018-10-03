@@ -3,7 +3,7 @@
 "Astrocytoma"	"#ED2891"
 "ATRT"	"#000000"
 "BCP-ALL"	"#97D1A9"
-"CNS Germinona"	"#00A99D"
+"CNS germinoma"	"#00A99D"
 "Colon Carcinoma"	"#F89420"
 "DIPG"	"#D3C3E0"
 "Embryonal Rhabdomyosarcoma"	"#00AEEF"
