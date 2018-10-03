@@ -142,11 +142,8 @@ full_status_df = (
 # In[13]:
 
 
-file = os.path.join('data', 'raw', '2018-05-22-pdx-clinical.txt')
+file = os.path.join('data', 'raw', '2018-09-30-pdx-clinical-final-for-paper.txt')
 clinical_df = pd.read_table(file)
-
-# Make every histology with the word `Other` in it in the same class
-clinical_df.loc[clinical_df.Histology.str.contains('Other'), 'Histology'] = "Other"
 
 print(clinical_df.shape)
 clinical_df.head(3)
@@ -155,7 +152,7 @@ clinical_df.head(3)
 # In[14]:
 
 
-clinical_df.Histology.value_counts()
+clinical_df['Histology-Detailed'].value_counts()
 
 
 # ## Load Predictions and Merge with Clinical and Alteration Data
@@ -404,43 +401,6 @@ get_mutant_boxplot(df=scores_df,
 # In[29]:
 
 
-# Recode the diagnosis codes for plotting
-recode_diagnosis = {
-    'Wilms tumor': 'Wilms',
-    'ATRT': 'Rhabdoid',
-    'Rhabdoid tumor': 'Rhabdoid',
-    'Small cell carcinoma (large cell variant)': 'Small Cell Carcinoma',
-    'Alveolar Soft Part Sarcoma': "Other Sarcoma",
-    "Primitive Neuronectomal tumors (PNET)": "PNET",
-    'Ependymoblastoma': "Ependymoma",
-    "Ewing, Ewings": "Ewing Sarcoma",
-    "Relapse Wilms": "Wilms",
-    "Pleomorphic Xanthoastrocytoma": "Astrocytoma",
-    "Wilms Tumor": "Wilms",
-    'Medulloblastoma (large cell anaplastic)': "Medulloblastoma",
-    "Poorly differentiated neuroblastoma": "Neuroblastoma",
-    "Ewing Sarcoma (originally diagnosed as ERMS)": "Ewing Sarcoma",
-    "Hepatoblastoma": "Other Renal",
-    "Wilms tumor/confirmed Ewing sarcoma of kidney": "Wilms",
-    "Clear Cell Sarcoma": "Other Sarcoma",
-    "osteosarcoma": "Osteosarcoma",
-    "mixed/embryonal Rhabdomyosarcoma": "Embryonal Rhabdomyosarcoma",
-    "Colon carcinoma": "Colon Carcinoma",
-    "Renal medullary carcinoma": "Other Renal",
-    "Anaplastic Rhabdoid Meningioma": "Rhabdoid",
-    "Ewing, PNET Ewings": "PNET",
-    "CNS germinoma": "CNS Germinona",
-    "Ph-likeT-ALL": "Ph-likeALL"
-}
-
-scores_df = scores_df.assign(
-    diagnosis_recode = scores_df.Diagnosis.replace(recode_diagnosis)
-)
-
-
-# In[30]:
-
-
 # Ras Alterations
 get_mutant_boxplot(df=scores_df,
                    gene='Ras',
@@ -448,7 +408,7 @@ get_mutant_boxplot(df=scores_df,
                    hist_color_dict=color_dict)
 
 
-# In[31]:
+# In[30]:
 
 
 # NF1 Alterations
@@ -458,7 +418,7 @@ get_mutant_boxplot(df=scores_df,
                    hist_color_dict=color_dict)
 
 
-# In[32]:
+# In[31]:
 
 
 # TP53 Alterations
@@ -470,7 +430,7 @@ get_mutant_boxplot(df=scores_df,
 
 # ## Write output files for downstream analysis
 
-# In[33]:
+# In[32]:
 
 
 # Classifier scores with clinical data and alteration status
@@ -483,15 +443,16 @@ scores_df[genes] = scores_df[genes].fillna(value=0)
 scores_df.sort_values(by='sample_id').to_csv(scores_file, sep='\t', index=False)
 
 
-# In[34]:
+# In[33]:
 
 
 # Output classifier scores for the specific variants observed
 status_scores_file = os.path.join("results", "classifier_scores_with_variants.tsv")
 
-classifier_scores_df = scores_df[['sample_id', 'ras_score' ,'tp53_score', 'nf1_score']]
+classifier_scores_df = scores_df[['sample_id', 'ras_score' ,'tp53_score', 'nf1_score', 'Histology-Detailed']]
 classifier_scores_df = (
     status_df
+    .drop(['Histology.Detailed'], axis='columns')
     .merge(classifier_scores_df, how='left', left_on='Model', right_on='sample_id')
 )
 
