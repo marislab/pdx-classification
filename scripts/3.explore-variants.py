@@ -77,21 +77,18 @@ ras_wildtype_df = (
     .query("ras_status == 0")
     .loc[:, ['sample_id', 'ras_score', 'Histology-Detailed']]
 )
-ras_wildtype_df.columns = ['sample_id', 'ras_score', 'Histology-Detailed']
 
 nf1_wildtype_df = (
     full_scores_df
     .query("nf1_status == 0")
-    .loc[:, ['sample_id', 'nf1_score', 'diagnosis_recode']]
+    .loc[:, ['sample_id', 'nf1_score', 'Histology-Detailed']]
 )
-nf1_wildtype_df.columns = ['sample_id', 'nf1_score', 'Histology-Detailed']
 
 tp53_wildtype_df = (
     full_scores_df
     .query("tp53_status == 0")
-    .loc[:, ['sample_id', 'tp53_score', 'diagnosis_recode']]
+    .loc[:, ['sample_id', 'tp53_score', 'Histology-Detailed']]
 )
-tp53_wildtype_df.columns = ['sample_id', 'tp53_score', 'Histology-Detailed']
 
 
 # In[8]:
@@ -104,19 +101,19 @@ ras_df = (
     ras_wildtype_df
     .merge(ras_scores_df, how='outer', on=['sample_id', 'ras_score', 'Histology-Detailed'])
 )
-ras_df[sub_cols] = ras_df[sub_cols].fillna(value='wild-type')
+ras_df.loc[:, sub_cols] = ras_df.loc[:, sub_cols].fillna(value='wild-type')
 
 nf1_df = (
     nf1_wildtype_df
     .merge(nf1_scores_df, how='outer', on=['sample_id', 'nf1_score', 'Histology-Detailed'])
 )
-nf1_df[sub_cols] = nf1_df[sub_cols].fillna(value='wild-type')
+nf1_df.loc[:, sub_cols] = nf1_df.loc[:, sub_cols].fillna(value='wild-type')
 
 tp53_df = (
     tp53_wildtype_df
     .merge(tp53_scores_df, how='outer', on=['sample_id', 'tp53_score', 'Histology-Detailed'])
 )
-tp53_df[sub_cols] = tp53_df[sub_cols].fillna(value='wild-type')
+tp53_df.loc[:, sub_cols] = tp53_df.loc[:, sub_cols].fillna(value='wild-type')
 
 
 # ## 1. Visualize classifier scores across genes
