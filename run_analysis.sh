@@ -20,5 +20,12 @@ jupyter nbconvert --to=html \
         --ExecutePreprocessor.timeout=$execute_time \
         --execute 2.evaluate-classifier-pdx.ipynb
 
+# Notebook 3 - Explore classifier score assignments
+jupyter nbconvert --to=html \
+        --FilesWriter.build_directory=html \
+        --ExecutePreprocessor.kernel_name=python3 \
+        --ExecutePreprocessor.timeout=$execute_time \
+        --execute 3.explore-variants.ipynb
+
 # Convert all notebooks to python scripts
 jupyter nbconvert --to=script --FilesWriter.build_directory=scripts *.ipynb

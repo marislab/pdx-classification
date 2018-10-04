@@ -25,6 +25,7 @@ The following notebooks describe the analysis pipeline
 | :------- | :---------- |
 | `1.apply-classifier.ipynb` | Apply the classifiers trained previously on the input data |
 | `2.evaluate-classifier.ipynb` | Investigate and evaluate the prediction performance and score distribution for input data |
+| ` 3.explore-variants.ipynb` | Explore the classifier predictions across genes, variants, and outliers |
 
 To rerun all scripts, perform the following:
 

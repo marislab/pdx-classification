@@ -47,9 +47,15 @@ from utils import get_mutant_boxplot, perform_ttest
 get_ipython().run_line_magic('matplotlib', 'inline')
 
 
+# In[3]:
+
+
+np.random.seed(123)
+
+
 # ## Load Status Matrix
 
-# In[3]:
+# In[4]:
 
 
 file = os.path.join('data', 'raw', '2018-09-21-muts-fusions.txt')
@@ -59,37 +65,37 @@ print(status_df.shape)
 status_df.head(3)
 
 
-# In[4]:
+# In[5]:
 
 
 status_df.Confidence.value_counts()
 
 
-# In[5]:
+# In[6]:
 
 
 status_df.Hugo_Symbol.value_counts()
 
 
-# In[6]:
+# In[7]:
 
 
 status_df.Variant_Classification.value_counts()
 
 
-# In[7]:
+# In[8]:
 
 
 status_df['Histology.Detailed'].value_counts()
 
 
-# In[8]:
+# In[9]:
 
 
 pd.crosstab(status_df['Histology.Detailed'], status_df.Hugo_Symbol)
 
 
-# In[9]:
+# In[10]:
 
 
 # Obtain a binary status matrix
@@ -98,7 +104,7 @@ full_status_df[full_status_df > 1] = 1
 full_status_df = full_status_df.reset_index()
 
 
-# In[10]:
+# In[11]:
 
 
 histology_df = status_df.loc[:, ['Model', 'Histology.Detailed']]
@@ -116,11 +122,11 @@ full_status_df.head()
 
 # ## Extract Gene Status
 
-# In[11]:
+# In[12]:
 
 
 # Ras Pathway Alterations
-ras_genes = ['ALK', 'NF1', 'PTPN11', 'BRAF', 'CIC', 'KRAS', 'HRAS', 'NRAS']
+ras_genes = ['ALK', 'NF1', 'PTPN11', 'BRAF', 'CIC', 'KRAS', 'HRAS', 'NRAS', 'DMD', 'SOS1']
 
 full_status_df = (
     full_status_df
@@ -133,28 +139,25 @@ full_status_df = (
 # 
 # This stores histology information
 
-# In[12]:
+# In[13]:
 
 
-file = os.path.join('data', 'raw', '2018-05-22-pdx-clinical.txt')
+file = os.path.join('data', 'raw', '2018-09-30-pdx-clinical-final-for-paper.txt')
 clinical_df = pd.read_table(file)
-
-# Make every histology with the word `Other` in it in the same class
-clinical_df.loc[clinical_df.Histology.str.contains('Other'), 'Histology'] = "Other"
 
 print(clinical_df.shape)
 clinical_df.head(3)
 
 
-# In[13]:
+# In[14]:
 
 
-clinical_df.Histology.value_counts()
+clinical_df['Histology-Detailed'].value_counts()
 
 
 # ## Load Predictions and Merge with Clinical and Alteration Data
 
-# In[14]:
+# In[15]:
 
 
 file = os.path.join('results', 'classifier_scores.tsv')
@@ -175,14 +178,14 @@ print(scores_df.shape)
 scores_df.head()
 
 
-# In[15]:
+# In[16]:
 
 
 scores_df = scores_df.assign(tp53_status = scores_df['TP53'])
 scores_df = scores_df.assign(nf1_status = scores_df['NF1'])
 
 
-# In[16]:
+# In[17]:
 
 
 gene_status = ['tp53_status', 'ras_status', 'nf1_status']
@@ -203,7 +206,7 @@ scores_df.head(2)
 
 # ## Load Histology Color Codes
 
-# In[17]:
+# In[18]:
 
 
 file = os.path.join('data', '2018-08-23-all-hist-colors.txt')
@@ -216,7 +219,7 @@ color_dict
 
 # ## Perform ROC and Precision-Recall Analysis using all Alteration Information
 
-# In[18]:
+# In[19]:
 
 
 n_classes = 3
@@ -260,14 +263,14 @@ for status, score, shuff in zip(('ras_status', 'nf1_status', 'tp53_status'),
     idx += 1
 
 
-# In[19]:
+# In[20]:
 
 
 if not os.path.exists('figures'):
     os.makedirs('figures')
 
 
-# In[20]:
+# In[21]:
 
 
 # Visualize ROC curves
@@ -307,7 +310,7 @@ file = os.path.join('figures', 'classifier_roc_curve.pdf')
 plt.savefig(file, bbox_extra_artists=(lgd,), bbox_inches='tight')
 
 
-# In[21]:
+# In[22]:
 
 
 # Visualize PR curves
@@ -345,21 +348,21 @@ plt.savefig(file, bbox_extra_artists=(lgd,), bbox_inches='tight')
 
 # ## Perform t-test against status classification
 
-# In[22]:
+# In[23]:
 
 
 t_results_ras = perform_ttest(scores_df, gene='ras')
 t_results_ras
 
 
-# In[23]:
+# In[24]:
 
 
 t_results_nf1 = perform_ttest(scores_df, gene='nf1')
 t_results_nf1
 
 
-# In[24]:
+# In[25]:
 
 
 t_results_tp53 = perform_ttest(scores_df, gene='tp53')
@@ -368,7 +371,7 @@ t_results_tp53
 
 # ## Observe broad differences across sample categories
 
-# In[25]:
+# In[26]:
 
 
 # Ras
@@ -377,7 +380,7 @@ get_mutant_boxplot(df=scores_df,
                    t_test_results=t_results_ras)
 
 
-# In[26]:
+# In[27]:
 
 
 # NF1
@@ -386,7 +389,7 @@ get_mutant_boxplot(df=scores_df,
                    t_test_results=t_results_nf1)
 
 
-# In[27]:
+# In[28]:
 
 
 # TP53
@@ -395,7 +398,7 @@ get_mutant_boxplot(df=scores_df,
                    t_test_results=t_results_tp53)
 
 
-# In[28]:
+# In[29]:
 
 
 # Ras Alterations
@@ -405,7 +408,7 @@ get_mutant_boxplot(df=scores_df,
                    hist_color_dict=color_dict)
 
 
-# In[29]:
+# In[30]:
 
 
 # NF1 Alterations
@@ -415,7 +418,7 @@ get_mutant_boxplot(df=scores_df,
                    hist_color_dict=color_dict)
 
 
-# In[30]:
+# In[31]:
 
 
 # TP53 Alterations
@@ -423,4 +426,35 @@ get_mutant_boxplot(df=scores_df,
                    gene='TP53',
                    histology=True,
                    hist_color_dict=color_dict)
+
+
+# ## Write output files for downstream analysis
+
+# In[32]:
+
+
+# Classifier scores with clinical data and alteration status
+scores_file = os.path.join("results", "classifier_scores_with_clinical_and_alterations.tsv")
+genes = ras_genes + ['TP53']
+
+scores_df.drop(['Model_x', 'Model_y', 'Histology_Full'], axis='columns')
+scores_df[genes] = scores_df[genes].fillna(value=0)
+
+scores_df.sort_values(by='sample_id').to_csv(scores_file, sep='\t', index=False)
+
+
+# In[33]:
+
+
+# Output classifier scores for the specific variants observed
+status_scores_file = os.path.join("results", "classifier_scores_with_variants.tsv")
+
+classifier_scores_df = scores_df[['sample_id', 'ras_score' ,'tp53_score', 'nf1_score', 'Histology-Detailed']]
+classifier_scores_df = (
+    status_df
+    .drop(['Histology.Detailed'], axis='columns')
+    .merge(classifier_scores_df, how='left', left_on='Model', right_on='sample_id')
+)
+
+classifier_scores_df.sort_values(by='Model').to_csv(status_scores_file, sep='\t', index=False)
 
