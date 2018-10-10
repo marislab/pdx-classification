@@ -13,7 +13,7 @@ mkdir -p 'data/raw/'
 # RNAseq data
 ####################################
 wget --output-document='data/raw/2018-08-24-PPTC_FPKM_matrix_withModelID-250.RDS' \
-  https://ndownloader.figshare.com/files/13113614
+  https://ndownloader.figshare.com/files/13189589
 
 
 ####################################
