@@ -134,6 +134,8 @@ full_status_df = (
             .max(axis='columns'))
 )
 
+full_status_df.head()
+
 
 # ## Load Clinical Data Information
 # 
@@ -437,7 +439,7 @@ get_mutant_boxplot(df=scores_df,
 scores_file = os.path.join("results", "classifier_scores_with_clinical_and_alterations.tsv")
 genes = ras_genes + ['TP53']
 
-scores_df.drop(['Model_x', 'Model_y', 'Histology_Full'], axis='columns')
+scores_df = scores_df.drop(['Model_x', 'Model_y', 'Histology_Full'], axis='columns')
 scores_df[genes] = scores_df[genes].fillna(value=0)
 
 scores_df.sort_values(by='sample_id').to_csv(scores_file, sep='\t', index=False)
