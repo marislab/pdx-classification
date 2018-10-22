@@ -12061,12 +12061,12 @@ Name: Confidence, dtype: int64</pre>
 ALK       18
 KRAS      16
 NF1       12
-DMD       10
 NRAS      10
+DMD       10
 CIC        8
 SOS1       7
-PTPN11     4
 HRAS       4
+PTPN11     4
 BRAF       3
 Name: Hugo_Symbol, dtype: int64</pre>
 </div>
@@ -12103,13 +12103,13 @@ Name: Hugo_Symbol, dtype: int64</pre>
 <div class="output_text output_subarea output_execute_result">
 <pre>Missense_Mutation    112
 Shallow_Del           17
-Nonsense_Mutation     13
 Fusion                13
+Nonsense_Mutation     13
 Frame_Shift_Del        5
 Splice_Site            3
 Frame_Shift_Ins        3
-In_Frame_Del           1
 Deep_Del               1
+In_Frame_Del           1
 Name: Variant_Classification, dtype: int64</pre>
 </div>
 
@@ -12150,18 +12150,18 @@ Glioblastoma                  13
 Ewing Sarcoma                 12
 Ph-likeALL                     7
 Embryonal Rhabdomyosarcoma     6
+MLL-ALL                        4
 Medulloblastoma                4
 Alveolar Rhabdomyosarcoma      4
-MLL-ALL                        4
-Wilms                          4
 T-ALL                          4
+Wilms                          4
 Astrocytoma                    3
 ATRT                           3
 ETP-ALL                        2
 Other Sarcoma                  2
-Colon Carcinoma                1
 Small Cell Carcinoma           1
 Rhabdoid                       1
+Colon Carcinoma                1
 Name: Histology.Detailed, dtype: int64</pre>
 </div>
 
@@ -12712,9 +12712,152 @@ Name: Histology.Detailed, dtype: int64</pre>
     <span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="n">ras_status</span> <span class="o">=</span> <span class="n">full_status_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">ras_genes</span><span class="p">]</span>
             <span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;columns&#39;</span><span class="p">))</span>
 <span class="p">)</span>
+
+<span class="n">full_status_df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
 
 </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt output_prompt">Out[12]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Model</th>
+      <th>ALK</th>
+      <th>BRAF</th>
+      <th>CIC</th>
+      <th>DMD</th>
+      <th>HRAS</th>
+      <th>KRAS</th>
+      <th>NF1</th>
+      <th>NRAS</th>
+      <th>PTPN11</th>
+      <th>SOS1</th>
+      <th>TP53</th>
+      <th>Histology_Full</th>
+      <th>ras_status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>ALL-03</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>MLL-ALL</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>ALL-07</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>BCP-ALL</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>ALL-08</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>T-ALL</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>ALL-108</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>Ph-likeALL</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>ALL-115</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>BCP-ALL</td>
+      <td>0</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+</div>
+
 </div>
 </div>
 
@@ -12917,21 +13060,21 @@ Wilms                         13
 Ewing Sarcoma                 10
 MLL-ALL                       10
 ATRT                           8
-Alveolar Rhabdomyosarcoma      7
 PNET                           7
+Alveolar Rhabdomyosarcoma      7
 Embryonal Rhabdomyosarcoma     7
 ETP-ALL                        6
-Ependymoma                     6
 Glioblastoma                   6
+Ependymoma                     6
 Rhabdoid                       5
-Ph+-ALL                        3
 Other Sarcoma                  3
+Ph+-ALL                        3
+Astrocytoma                    2
+Small Cell Carcinoma           2
 Other Renal                    2
 DIPG                           2
-Small Cell Carcinoma           2
-Astrocytoma                    2
-CNS germinoma                  1
 Colon Carcinoma                1
+CNS germinoma                  1
 Name: Histology-Detailed, dtype: int64</pre>
 </div>
 
@@ -13967,7 +14110,7 @@ Name: Histology-Detailed, dtype: int64</pre>
 <span class="n">scores_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;results&quot;</span><span class="p">,</span> <span class="s2">&quot;classifier_scores_with_clinical_and_alterations.tsv&quot;</span><span class="p">)</span>
 <span class="n">genes</span> <span class="o">=</span> <span class="n">ras_genes</span> <span class="o">+</span> <span class="p">[</span><span class="s1">&#39;TP53&#39;</span><span class="p">]</span>
 
-<span class="n">scores_df</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="s1">&#39;Model_x&#39;</span><span class="p">,</span> <span class="s1">&#39;Model_y&#39;</span><span class="p">,</span> <span class="s1">&#39;Histology_Full&#39;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="s1">&#39;columns&#39;</span><span class="p">)</span>
+<span class="n">scores_df</span> <span class="o">=</span> <span class="n">scores_df</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="s1">&#39;Model_x&#39;</span><span class="p">,</span> <span class="s1">&#39;Model_y&#39;</span><span class="p">,</span> <span class="s1">&#39;Histology_Full&#39;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="s1">&#39;columns&#39;</span><span class="p">)</span>
 <span class="n">scores_df</span><span class="p">[</span><span class="n">genes</span><span class="p">]</span> <span class="o">=</span> <span class="n">scores_df</span><span class="p">[</span><span class="n">genes</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
 <span class="n">scores_df</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s1">&#39;sample_id&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">scores_file</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
