@@ -1,4 +1,6 @@
-# Copyright (C) 2018 The Children's Hospital of Philadelphia 
+# BSD 3-Clause License
+
+Copyright (C) 2018 Contributors, The Children's Hospital of Philadelphia, and Trustees of The University of Pennsylvania
 
 All rights reserved.
 
