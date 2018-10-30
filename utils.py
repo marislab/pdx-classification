@@ -1,5 +1,5 @@
 """
-Import methods for multiple myeloma multiclass classifier
+Import helper methods
 Gregory Way 2018
 
 Usage:
