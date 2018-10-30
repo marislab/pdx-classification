@@ -1,10 +1,10 @@
-# Apply Machine Learning Classifiers to Expression Data
+# Applying Machine Learning Classifiers to Pediatric Patient Derived Xenograft Expression Data
 
 **Gregory Way, Jo Lynne Harenza, John Maris, 2018**
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1475249.svg)](https://doi.org/10.5281/zenodo.1475249)
 
-Here, we apply a Ras activation and TP53 inactivation classifier to Target Patient Derived Xenograft (PDX) RNAseq data.
+Here, we apply a Ras activation, an _NF1_ inactivation, and a _TP53_ inactivation classifier to Target Patient Derived Xenograft (PDX) RNAseq data.
 The classifiers were previously trained using data from The Cancer Genome Atlas (TCGA) PanCanAtlas Project ([Way et al. 2018](https://doi.org/10.1016/j.celrep.2018.03.046 "Machine Learning Detects Pan-cancer Ras Pathway Activation in The Cancer Genome Atlas"), [Knijnenburg et al. 2018](https://doi.org/10.1016/j.celrep.2018.03.076 "Genomic and Molecular Landscape of DNA Damage Repair Deficiency across The Cancer Genome Atlas"))
 
 ## Computational Environment
