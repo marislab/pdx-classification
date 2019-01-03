@@ -58,7 +58,7 @@ np.random.seed(123)
 # In[4]:
 
 
-file = os.path.join('data', 'raw', '2018-09-21-muts-fusions.txt')
+file = os.path.join('data', 'raw', '2019-01-03-muts-fusions.txt')
 status_df = pd.read_table(file)
 
 print(status_df.shape)
@@ -268,8 +268,7 @@ for status, score, shuff in zip(('ras_status', 'nf1_status', 'tp53_status'),
 # In[20]:
 
 
-if not os.path.exists('figures'):
-    os.makedirs('figures')
+os.makedirs('figures', exist_ok=True)
 
 
 # In[21]:

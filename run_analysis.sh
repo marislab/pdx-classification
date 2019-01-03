@@ -11,14 +11,14 @@ jupyter nbconvert --to=html \
         --FilesWriter.build_directory=html \
         --ExecutePreprocessor.kernel_name=python3 \
         --ExecutePreprocessor.timeout=$execute_time \
-        --execute 1.apply-classifier-pdx.ipynb
+        --execute 1.apply-classifier.ipynb
 
 # Notebook 2 - Evaluate the prediction performance
 jupyter nbconvert --to=html \
         --FilesWriter.build_directory=html \
         --ExecutePreprocessor.kernel_name=python3 \
         --ExecutePreprocessor.timeout=$execute_time \
-        --execute 2.evaluate-classifier-pdx.ipynb
+        --execute 2.evaluate-classifier.ipynb
 
 # Notebook 3 - Explore classifier score assignments
 jupyter nbconvert --to=html \

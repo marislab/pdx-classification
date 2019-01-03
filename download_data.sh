@@ -12,15 +12,14 @@ mkdir -p 'data/raw/'
 ####################################
 # RNAseq data
 ####################################
-wget --output-document='data/raw/2018-08-24-PPTC_FPKM_matrix_withModelID-250.RDS' \
-  https://ndownloader.figshare.com/files/13189589
-
+wget --output-document='data/raw/2018-12-27-PPTC_FPKM_matrix_withModelID-248.RDS' \
+  https://ndownloader.figshare.com/files/14023604
 
 ####################################
 # Genomic alterations data
 ####################################
-wget --output-document='data/raw/2018-09-21-muts-fusions.txt' \
-  https://ndownloader.figshare.com/files/13113617
+wget --output-document='data/raw/2019-01-03-muts-fusions.txt' \
+  https://ndownloader.figshare.com/files/14023742
 
 ####################################
 # Checksums

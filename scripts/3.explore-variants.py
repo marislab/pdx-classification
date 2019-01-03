@@ -182,7 +182,7 @@ ax.set_ylabel('TP53 Classifier Score', fontsize=12)
 ax.set_xlabel('Variant Classifications', fontsize=12)
 handles, labels = ax.get_legend_handles_labels()
 
-lgd = plt.legend(handles[10:20], labels[10:20],
+lgd = plt.legend(handles[15:30], labels[15:30],
                  ncol=1,
                  bbox_to_anchor=(1.03, 1),
                  loc=2,
@@ -223,7 +223,7 @@ ax.set_ylabel('TP53 Classifier Score', fontsize=12)
 ax.set_xlabel('Osteosarcoma Mutation Status', fontsize=12)
 handles, labels = ax.get_legend_handles_labels()
 
-lgd = plt.legend(handles[8:18], labels[8:18],
+lgd = plt.legend(handles[13:26], labels[13:26],
                  ncol=1,
                  bbox_to_anchor=(1.03, 1),
                  loc=2,
