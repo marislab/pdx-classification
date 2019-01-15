@@ -61,11 +61,12 @@ full_scores_df.head(2)
 
 
 # Extract scores for each variant
-ras_genes = ['ALK', 'NF1', 'PTPN11', 'BRAF', 'CIC', 'KRAS', 'HRAS', 'NRAS', 'DMD', 'SOS1']
+ras_genes = ['ALK', 'NF1', 'PTPN11', 'BRAF', 'KRAS', 'HRAS', 'NRAS']
+tp53_genes = ["TP53", "RB1", "CHEK2", "MDM2", "MDM4"]
 
 ras_scores_df = scores_df.query("Hugo_Symbol in @ras_genes")
 nf1_scores_df = scores_df.query("Hugo_Symbol == 'NF1'")
-tp53_scores_df = scores_df.query("Hugo_Symbol == 'TP53'")
+tp53_scores_df = scores_df.query("Hugo_Symbol == @tp53_genes")
 
 
 # In[7]:
@@ -95,7 +96,7 @@ tp53_wildtype_df = (
 
 
 # Merge data for downstream plotting
-sub_cols = ['Variant_Classification', 'Confidence', 'Hugo_Symbol']
+sub_cols = ['Variant_Classification', 'Hugo_Symbol']
 
 ras_df = (
     ras_wildtype_df
@@ -121,46 +122,31 @@ tp53_df.loc[:, sub_cols] = tp53_df.loc[:, sub_cols].fillna(value='wild-type')
 # In[9]:
 
 
-confidence_pal = {'high': '#e41a1c',
-                  'low': '#377eb8',
-                  'unknown': '#ff7f00',
-                  'wild-type': '#984ea3'}
+vis_classifier_scores(df=ras_df,
+                      gene='Ras',
+                      rcparam=(8.5, 4))
 
 
 # In[10]:
 
 
-vis_classifier_scores(df=ras_df,
-                      gene='Ras',
-                      confidence_color_dict=confidence_pal,
-                      rcparam=(8.5, 4))
+vis_classifier_scores(df=nf1_df, gene='NF1')
 
 
 # In[11]:
 
 
-nf1_df.loc[nf1_df['Hugo_Symbol'] == 'wild-type', 'Hugo_Symbol'] = 'NF1'
-
-vis_classifier_scores(df=nf1_df,
-                      gene='NF1',
-                      confidence_color_dict=confidence_pal)
+vis_classifier_scores(df=tp53_df,
+                      gene='TP53')
 
 
 # In[12]:
 
 
-tp53_df.loc[tp53_df['Hugo_Symbol'] == 'wild-type', 'Hugo_Symbol'] = 'TP53'
-
-vis_classifier_scores(df=tp53_df,
-                      gene='TP53',
-                      confidence_color_dict=confidence_pal)
-
-
-# In[13]:
-
-
 # Plot different variant classifications across TP53
 file = os.path.join('figures', 'TP53_variant_classification.pdf')
+
+plt.figure(figsize=(7.5, 4))
 ax = sns.boxplot(x='Hugo_Symbol',
                  y='tp53_score',
                  data=tp53_df,
@@ -174,15 +160,15 @@ ax = sns.stripplot(x='Hugo_Symbol',
                    hue='Variant_Classification',
                    dodge=True,
                    edgecolor='black',
-                   jitter=0.25,
-                   size=4,
+                   jitter=0.15,
+                   size=2.5,
                    alpha=0.65)
 
 ax.set_ylabel('TP53 Classifier Score', fontsize=12)
 ax.set_xlabel('Variant Classifications', fontsize=12)
 handles, labels = ax.get_legend_handles_labels()
 
-lgd = plt.legend(handles[15:30], labels[15:30],
+lgd = plt.legend(handles[11:35], labels[11:35],
                  ncol=1,
                  bbox_to_anchor=(1.03, 1),
                  loc=2,
@@ -191,16 +177,17 @@ lgd = plt.legend(handles[15:30], labels[15:30],
 
 plt.axhline(linewidth=2, y=0.5, color='black', linestyle='dashed')
 plt.tight_layout()
-plt.savefig(file)
+plt.savefig(file, dpi=400)
 
 
-# In[14]:
+# In[13]:
 
 
 # Visualize Osteosarcoma Specifically
 osteo_df = tp53_df[tp53_df["Histology-Detailed"] == "Osteosarcoma"]
 file = os.path.join('figures', 'TP53_osteosarcoma_variant_classification.pdf')
 
+plt.figure(figsize=(7.5, 4))
 ax = sns.boxplot(x='Hugo_Symbol',
                  y='tp53_score',
                  data=osteo_df,
@@ -223,7 +210,7 @@ ax.set_ylabel('TP53 Classifier Score', fontsize=12)
 ax.set_xlabel('Osteosarcoma Mutation Status', fontsize=12)
 handles, labels = ax.get_legend_handles_labels()
 
-lgd = plt.legend(handles[13:26], labels[13:26],
+lgd = plt.legend(handles[11:26], labels[11:26],
                  ncol=1,
                  bbox_to_anchor=(1.03, 1),
                  loc=2,
@@ -239,28 +226,28 @@ plt.savefig(file)
 # 
 # These are false positive and false negative samples.
 
-# In[15]:
+# In[14]:
 
 
 # What are the outliers in TP53 mutated samples?
 tp53_outlier_df = extract_outliers(df=tp53_df, gene='TP53')
 
 
-# In[16]:
+# In[15]:
 
 
 # What are the outliers in Ras mutated samples?
 ras_outlier_df = extract_outliers(df=ras_df, gene='Ras')
 
 
-# In[17]:
+# In[16]:
 
 
 # What are the outliers in NF1 mutated samples?
 nf1_outlier_df = extract_outliers(df=nf1_df, gene='NF1')
 
 
-# In[18]:
+# In[17]:
 
 
 # Combine outliers into single dataframe
@@ -272,12 +259,13 @@ full_outlier_df = (
     .sort_values(by='classifier_score', ascending=False)
     .drop_duplicates()
     .reset_index(drop=True)
+    .rename({'hugo_symbol': 'classifier_gene'}, axis='columns')
 )
 
 full_outlier_df.head()
 
 
-# In[19]:
+# In[18]:
 
 
 file = os.path.join("results", "outlier_predictions_ras_tp53_nf1.tsv")
