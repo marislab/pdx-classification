@@ -187,15 +187,13 @@ def get_mutant_boxplot(df, gene, t_test_results=None, histology=False,
     plt.show()
 
 
-def vis_classifier_scores(df, gene, confidence_color_dict, rcparam=(6, 4),
-                          variant_plot=False):
+def vis_classifier_scores(df, gene, rcparam=(6, 4), variant_plot=False):
     """
     Build boxplot of classifier scores stratified by gene confidence scores
 
     Arguments:
     df - the dataframe of scores
     gene - the name of the gene to input
-    confidence_color_dict - a dict storing hex colors for confidence levels
     variant_plot - boolean if the x axis should be variant classifications
     """
     import os
@@ -209,25 +207,19 @@ def vis_classifier_scores(df, gene, confidence_color_dict, rcparam=(6, 4),
 
     y = '{}_score'.format(lower_gene)
     ylabel = '{} Classifier Score'.format(gene)
-    output_file = os.path.join('figures',
-                               '{}_confidence_scores.pdf'.format(gene))
+    output_file = os.path.join('figures', '{}_scores.pdf'.format(gene))
 
     plt.rcParams['figure.figsize'] = rcparam
     ax = sns.boxplot(x='Hugo_Symbol',
                      y=y,
                      data=df,
-                     hue='Confidence',
                      color='white',
-                     hue_order=['high', 'low', 'unknown', 'wild-type'],
                      fliersize=0)
 
     ax = sns.stripplot(x='Hugo_Symbol',
                        y=y,
                        data=df,
-                       hue='Confidence',
-                       hue_order=['high', 'low', 'unknown', 'wild-type'],
                        dodge=True,
-                       palette=confidence_color_dict,
                        edgecolor='black',
                        jitter=0.25,
                        size=4,
@@ -274,7 +266,7 @@ def extract_outliers(df, gene):
     # Obtain false positives and false negatives
     false_negatives = (
         df
-        .query('Confidence != "wild-type"')
+        .query('Hugo_Symbol != "wild-type"')
         .sort_values(by=score, ascending=False)
         .iloc[:, 0:3]
     )
@@ -282,7 +274,7 @@ def extract_outliers(df, gene):
 
     false_positives = (
         df
-        .query('Confidence == "wild-type"')
+        .query('Hugo_Symbol == "wild-type"')
         .sort_values(by=score, ascending=False)
         .iloc[:, 0:3]
     )
