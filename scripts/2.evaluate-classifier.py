@@ -58,7 +58,7 @@ np.random.seed(123)
 # In[4]:
 
 
-file = os.path.join('data', 'raw', '2019-01-03-muts-fusions.txt')
+file = os.path.join('data', 'raw', '2019-01-14-ras-tp53-nf1-alterations.txt')
 status_df = pd.read_table(file)
 
 print(status_df.shape)
@@ -68,34 +68,28 @@ status_df.head(3)
 # In[5]:
 
 
-status_df.Confidence.value_counts()
+status_df.Hugo_Symbol.value_counts()
 
 
 # In[6]:
 
 
-status_df.Hugo_Symbol.value_counts()
+status_df.Variant_Classification.value_counts()
 
 
 # In[7]:
 
 
-status_df.Variant_Classification.value_counts()
+pd.crosstab(status_df['Histology.Detailed'], status_df.classifier)
 
 
 # In[8]:
 
 
-status_df['Histology.Detailed'].value_counts()
-
-
-# In[9]:
-
-
 pd.crosstab(status_df['Histology.Detailed'], status_df.Hugo_Symbol)
 
 
-# In[10]:
+# In[9]:
 
 
 # Obtain a binary status matrix
@@ -104,7 +98,7 @@ full_status_df[full_status_df > 1] = 1
 full_status_df = full_status_df.reset_index()
 
 
-# In[11]:
+# In[10]:
 
 
 histology_df = status_df.loc[:, ['Model', 'Histology.Detailed']]
@@ -122,16 +116,19 @@ full_status_df.head()
 
 # ## Extract Gene Status
 
-# In[12]:
+# In[11]:
 
 
 # Ras Pathway Alterations
-ras_genes = ['ALK', 'NF1', 'PTPN11', 'BRAF', 'CIC', 'KRAS', 'HRAS', 'NRAS', 'DMD', 'SOS1']
+ras_genes = ['ALK', 'NF1', 'PTPN11', 'BRAF', 'KRAS', 'HRAS', 'NRAS']
+tp53_genes = ["TP53", "RB1", "CHEK2", "MDM2", "MDM4"]
 
 full_status_df = (
     full_status_df
-    .assign(ras_status = full_status_df.loc[:, ras_genes]
-            .max(axis='columns'))
+    .assign(ras_status = full_status_df.loc[:, ras_genes].sum(axis=1),
+            tp53_status = full_status_df.loc[:, tp53_genes].sum(axis=1),
+            nf1_status = full_status_df['NF1'])
+    
 )
 
 full_status_df.head()
@@ -141,7 +138,7 @@ full_status_df.head()
 # 
 # This stores histology information
 
-# In[13]:
+# In[12]:
 
 
 file = os.path.join('data', 'raw', '2018-09-30-pdx-clinical-final-for-paper.txt')
@@ -151,15 +148,9 @@ print(clinical_df.shape)
 clinical_df.head(3)
 
 
-# In[14]:
-
-
-clinical_df['Histology-Detailed'].value_counts()
-
-
 # ## Load Predictions and Merge with Clinical and Alteration Data
 
-# In[15]:
+# In[13]:
 
 
 file = os.path.join('results', 'classifier_scores.tsv')
@@ -180,14 +171,7 @@ print(scores_df.shape)
 scores_df.head()
 
 
-# In[16]:
-
-
-scores_df = scores_df.assign(tp53_status = scores_df['TP53'])
-scores_df = scores_df.assign(nf1_status = scores_df['NF1'])
-
-
-# In[17]:
+# In[14]:
 
 
 gene_status = ['tp53_status', 'ras_status', 'nf1_status']
@@ -202,13 +186,13 @@ scores_df.loc[scores_df['nf1_status'] != 0, 'nf1_status'] = 1
 scores_df['tp53_status'] = scores_df['tp53_status'].astype(int)
 scores_df['ras_status'] = scores_df['ras_status'].astype(int)
 scores_df['nf1_status'] = scores_df['nf1_status'].astype(int)
-              
+
 scores_df.head(2)
 
 
 # ## Load Histology Color Codes
 
-# In[18]:
+# In[15]:
 
 
 file = os.path.join('data', '2018-08-23-all-hist-colors.txt')
@@ -221,13 +205,16 @@ color_dict
 
 # ## Perform ROC and Precision-Recall Analysis using all Alteration Information
 
-# In[19]:
+# In[16]:
 
 
 n_classes = 3
+labels = ['Ras', 'NF1', 'TP53']
+colors = ['#1b9e77', '#d95f02', '#7570b3']
 
 fpr_pdx = {}
 tpr_pdx = {}
+thresh_pdx = {}
 precision_pdx = {}
 recall_pdx = {}
 auroc_pdx = {}
@@ -235,10 +222,13 @@ aupr_pdx = {}
 
 fpr_shuff = {}
 tpr_shuff = {}
+thresh_shuff = {}
 precision_shuff = {}
 recall_shuff = {}
 auroc_shuff = {}
 aupr_shuff = {}
+
+all_roc_list = []
 
 idx = 0
 for status, score, shuff in zip(('ras_status', 'nf1_status', 'tp53_status'),
@@ -251,34 +241,48 @@ for status, score, shuff in zip(('ras_status', 'nf1_status', 'tp53_status'),
     shuffle_score = scores_df.loc[:, shuff]
  
     # Get Metrics
-    fpr_pdx[idx], tpr_pdx[idx], _ = roc_curve(sample_status, sample_score)
+    fpr_pdx[idx], tpr_pdx[idx], thresh_pdx[idx] = roc_curve(sample_status, sample_score, drop_intermediate=False)
     precision_pdx[idx], recall_pdx[idx], _ = precision_recall_curve(sample_status, sample_score)
     auroc_pdx[idx] = roc_auc_score(sample_status, sample_score)
     aupr_pdx[idx] = average_precision_score(sample_status, sample_score)
     
     # Obtain Shuffled Metrics
-    fpr_shuff[idx], tpr_shuff[idx], _ = roc_curve(sample_status, shuffle_score)
+    fpr_shuff[idx], tpr_shuff[idx], thresh_shuff[idx] = roc_curve(sample_status, shuffle_score, drop_intermediate=False)
     precision_shuff[idx], recall_shuff[idx], _ = precision_recall_curve(sample_status, shuffle_score)
     auroc_shuff[idx] = roc_auc_score(sample_status, shuffle_score)
     aupr_shuff[idx] = average_precision_score(sample_status, shuffle_score)
     
+    roc_df = (
+        pd.DataFrame([fpr_pdx[idx], tpr_pdx[idx], thresh_pdx[idx]], index=['fpr', 'tpr', 'threshold'])
+        .transpose()
+        .assign(gene=labels[idx],
+                shuffled=False)
+    )
+    
+    roc_shuffled_df = (
+    pd.DataFrame([fpr_shuff[idx], tpr_shuff[idx], thresh_shuff[idx]], index=['fpr', 'tpr', 'threshold'])
+    .transpose()
+    .assign(gene=labels[idx],
+            shuffled=True)
+    )
+    
+    all_roc_list.append(roc_df)
+    all_roc_list.append(roc_shuffled_df)
+
     idx += 1
 
 
-# In[20]:
+# In[17]:
 
 
 os.makedirs('figures', exist_ok=True)
 
 
-# In[21]:
+# In[18]:
 
 
 # Visualize ROC curves
 plt.subplots(figsize=(4, 4))
-
-labels = ['Ras', 'NF1', 'TP53']
-colors = ['#1b9e77', '#d95f02', '#7570b3']
 
 for i in range(n_classes):
     plt.plot(fpr_pdx[i], tpr_pdx[i],
@@ -311,7 +315,7 @@ file = os.path.join('figures', 'classifier_roc_curve.pdf')
 plt.savefig(file, bbox_extra_artists=(lgd,), bbox_inches='tight')
 
 
-# In[22]:
+# In[19]:
 
 
 # Visualize PR curves
@@ -349,21 +353,21 @@ plt.savefig(file, bbox_extra_artists=(lgd,), bbox_inches='tight')
 
 # ## Perform t-test against status classification
 
-# In[23]:
+# In[20]:
 
 
 t_results_ras = perform_ttest(scores_df, gene='ras')
 t_results_ras
 
 
-# In[24]:
+# In[21]:
 
 
 t_results_nf1 = perform_ttest(scores_df, gene='nf1')
 t_results_nf1
 
 
-# In[25]:
+# In[22]:
 
 
 t_results_tp53 = perform_ttest(scores_df, gene='tp53')
@@ -372,7 +376,7 @@ t_results_tp53
 
 # ## Observe broad differences across sample categories
 
-# In[26]:
+# In[23]:
 
 
 # Ras
@@ -381,7 +385,7 @@ get_mutant_boxplot(df=scores_df,
                    t_test_results=t_results_ras)
 
 
-# In[27]:
+# In[24]:
 
 
 # NF1
@@ -390,7 +394,7 @@ get_mutant_boxplot(df=scores_df,
                    t_test_results=t_results_nf1)
 
 
-# In[28]:
+# In[25]:
 
 
 # TP53
@@ -399,7 +403,7 @@ get_mutant_boxplot(df=scores_df,
                    t_test_results=t_results_tp53)
 
 
-# In[29]:
+# In[26]:
 
 
 # Ras Alterations
@@ -409,7 +413,7 @@ get_mutant_boxplot(df=scores_df,
                    hist_color_dict=color_dict)
 
 
-# In[30]:
+# In[27]:
 
 
 # NF1 Alterations
@@ -419,7 +423,7 @@ get_mutant_boxplot(df=scores_df,
                    hist_color_dict=color_dict)
 
 
-# In[31]:
+# In[28]:
 
 
 # TP53 Alterations
@@ -431,7 +435,7 @@ get_mutant_boxplot(df=scores_df,
 
 # ## Write output files for downstream analysis
 
-# In[32]:
+# In[29]:
 
 
 # Classifier scores with clinical data and alteration status
@@ -444,7 +448,7 @@ scores_df[genes] = scores_df[genes].fillna(value=0)
 scores_df.sort_values(by='sample_id').to_csv(scores_file, sep='\t', index=False)
 
 
-# In[33]:
+# In[30]:
 
 
 # Output classifier scores for the specific variants observed
@@ -458,4 +462,14 @@ classifier_scores_df = (
 )
 
 classifier_scores_df.sort_values(by='Model').to_csv(status_scores_file, sep='\t', index=False)
+
+
+# In[31]:
+
+
+# ROC Curve Estimates
+file = os.path.join("results", "full_roc_threshold_results.tsv")
+
+full_roc_df = pd.concat(all_roc_list, axis='rows')
+full_roc_df.to_csv(file, sep='\t', index=False)
 
