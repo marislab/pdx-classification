@@ -120,7 +120,7 @@ full_status_df.head()
 
 
 # Ras Pathway Alterations
-ras_genes = ['ALK', 'NF1', 'PTPN11', 'BRAF', 'KRAS', 'HRAS', 'NRAS']
+ras_genes = ['KRAS', 'HRAS', 'NRAS']
 tp53_genes = ["TP53", "RB1", "CHEK2", "MDM2", "MDM4"]
 
 full_status_df = (
@@ -203,9 +203,29 @@ color_dict = dict(zip(color_code_df.Histology, color_code_df.Color))
 color_dict
 
 
-# ## Perform ROC and Precision-Recall Analysis using all Alteration Information
+# ## Determine Status Counts
 
 # In[16]:
+
+
+scores_df.tp53_status.value_counts()
+
+
+# In[17]:
+
+
+scores_df.ras_status.value_counts()
+
+
+# In[18]:
+
+
+scores_df.nf1_status.value_counts()
+
+
+# ## Perform ROC and Precision-Recall Analysis using all Alteration Information
+
+# In[19]:
 
 
 n_classes = 3
@@ -272,13 +292,13 @@ for status, score, shuff in zip(('ras_status', 'nf1_status', 'tp53_status'),
     idx += 1
 
 
-# In[17]:
+# In[20]:
 
 
 os.makedirs('figures', exist_ok=True)
 
 
-# In[18]:
+# In[21]:
 
 
 # Visualize ROC curves
@@ -315,7 +335,7 @@ file = os.path.join('figures', 'classifier_roc_curve.pdf')
 plt.savefig(file, bbox_extra_artists=(lgd,), bbox_inches='tight')
 
 
-# In[19]:
+# In[22]:
 
 
 # Visualize PR curves
@@ -353,21 +373,21 @@ plt.savefig(file, bbox_extra_artists=(lgd,), bbox_inches='tight')
 
 # ## Perform t-test against status classification
 
-# In[20]:
+# In[23]:
 
 
 t_results_ras = perform_ttest(scores_df, gene='ras')
 t_results_ras
 
 
-# In[21]:
+# In[24]:
 
 
 t_results_nf1 = perform_ttest(scores_df, gene='nf1')
 t_results_nf1
 
 
-# In[22]:
+# In[25]:
 
 
 t_results_tp53 = perform_ttest(scores_df, gene='tp53')
@@ -376,7 +396,7 @@ t_results_tp53
 
 # ## Observe broad differences across sample categories
 
-# In[23]:
+# In[26]:
 
 
 # Ras
@@ -385,7 +405,7 @@ get_mutant_boxplot(df=scores_df,
                    t_test_results=t_results_ras)
 
 
-# In[24]:
+# In[27]:
 
 
 # NF1
@@ -394,7 +414,7 @@ get_mutant_boxplot(df=scores_df,
                    t_test_results=t_results_nf1)
 
 
-# In[25]:
+# In[28]:
 
 
 # TP53
@@ -403,7 +423,7 @@ get_mutant_boxplot(df=scores_df,
                    t_test_results=t_results_tp53)
 
 
-# In[26]:
+# In[29]:
 
 
 # Ras Alterations
@@ -413,7 +433,7 @@ get_mutant_boxplot(df=scores_df,
                    hist_color_dict=color_dict)
 
 
-# In[27]:
+# In[30]:
 
 
 # NF1 Alterations
@@ -423,7 +443,7 @@ get_mutant_boxplot(df=scores_df,
                    hist_color_dict=color_dict)
 
 
-# In[28]:
+# In[31]:
 
 
 # TP53 Alterations
@@ -435,7 +455,7 @@ get_mutant_boxplot(df=scores_df,
 
 # ## Write output files for downstream analysis
 
-# In[29]:
+# In[32]:
 
 
 # Classifier scores with clinical data and alteration status
@@ -448,7 +468,7 @@ scores_df[genes] = scores_df[genes].fillna(value=0)
 scores_df.sort_values(by='sample_id').to_csv(scores_file, sep='\t', index=False)
 
 
-# In[30]:
+# In[33]:
 
 
 # Output classifier scores for the specific variants observed
@@ -464,7 +484,7 @@ classifier_scores_df = (
 classifier_scores_df.sort_values(by='Model').to_csv(status_scores_file, sep='\t', index=False)
 
 
-# In[31]:
+# In[34]:
 
 
 # ROC Curve Estimates
