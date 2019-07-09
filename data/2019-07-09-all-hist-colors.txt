@@ -1,0 +1,40 @@
+Histology,Color
+ATRT,#000000
+Wilms,#007EB5
+MLL-ALL,#009444
+CNS germinoma,#00A99D
+Fusion- RMS,#00AEEF
+Fusion-_RMS,#00AEEF
+Hepatoblastoma,#104A7F
+Ph+-ALL,#3953A4
+Ewing Sarcoma,#542C88
+Ewing_Sarcoma,#542C88
+Osteosarcoma,#6E7BA2
+ETP-ALL,#754C29
+CNS EFT-CIC,#7E1918
+CNS embryonal NOS,#F9ED32
+BCP-ALL,#97D1A9
+Extracranial Rhabdoid,#9EDDF9
+DIPG,#A084BD
+Glioblastoma,#B2509E
+Ph-likeALL,#BE1E2D
+Ependymoma,#C1A72F
+ETMR,#CACCDB
+T-ALL,#CEAC8F
+Small Cell Carcinoma,#D3C3E0
+Ependymoblastoma,#D97D25
+ASPS,#DAF1FC
+Fusion+ RMS,#E8C51D
+Neuroblastoma,#EA7075
+Astrocytoma,#ED2891
+Clear Cell Sarcoma,#F6B667
+Colon Carcinoma,#F89420
+MB-SHH,#FBE3C7
+MB-WNT,#FAD2D9
+MB-Group3,#F8AFB3
+MB-Group4,#ED1C24
+MB-Unclassified,#D49DC7
+ST-EPN-RELA,#C1A72F
+ST-EPN-YAP1,#836FFF
+PF-EPN-A,#43CD80
+PF-EPN-B,#FF7256
