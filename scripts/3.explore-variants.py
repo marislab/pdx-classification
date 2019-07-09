@@ -62,7 +62,7 @@ full_scores_df.head(2)
 
 # Extract scores for each variant
 ras_genes = ['ALK', 'NF1', 'PTPN11', 'BRAF', 'KRAS', 'HRAS', 'NRAS']
-tp53_genes = ["TP53", "RB1", "CHEK2", "MDM2", "MDM4"]
+tp53_genes = ["TP53", "RB1", "CHEK2", "MDM2"]
 
 ras_scores_df = scores_df.query("Hugo_Symbol in @ras_genes")
 nf1_scores_df = scores_df.query("Hugo_Symbol == 'NF1'")
@@ -76,19 +76,19 @@ tp53_scores_df = scores_df.query("Hugo_Symbol == @tp53_genes")
 ras_wildtype_df = (
     full_scores_df
     .query("ras_status == 0")
-    .loc[:, ['sample_id', 'ras_score', 'Histology-Detailed']]
+    .loc[:, ['sample_id', 'ras_score', 'Histology.Detailed']]
 )
 
 nf1_wildtype_df = (
     full_scores_df
     .query("nf1_status == 0")
-    .loc[:, ['sample_id', 'nf1_score', 'Histology-Detailed']]
+    .loc[:, ['sample_id', 'nf1_score', 'Histology.Detailed']]
 )
 
 tp53_wildtype_df = (
     full_scores_df
     .query("tp53_status == 0")
-    .loc[:, ['sample_id', 'tp53_score', 'Histology-Detailed']]
+    .loc[:, ['sample_id', 'tp53_score', 'Histology.Detailed']]
 )
 
 
@@ -100,19 +100,19 @@ sub_cols = ['Variant_Classification', 'Hugo_Symbol']
 
 ras_df = (
     ras_wildtype_df
-    .merge(ras_scores_df, how='outer', on=['sample_id', 'ras_score', 'Histology-Detailed'])
+    .merge(ras_scores_df, how='outer', on=['sample_id', 'ras_score', 'Histology.Detailed'])
 )
 ras_df.loc[:, sub_cols] = ras_df.loc[:, sub_cols].fillna(value='wild-type')
 
 nf1_df = (
     nf1_wildtype_df
-    .merge(nf1_scores_df, how='outer', on=['sample_id', 'nf1_score', 'Histology-Detailed'])
+    .merge(nf1_scores_df, how='outer', on=['sample_id', 'nf1_score', 'Histology.Detailed'])
 )
 nf1_df.loc[:, sub_cols] = nf1_df.loc[:, sub_cols].fillna(value='wild-type')
 
 tp53_df = (
     tp53_wildtype_df
-    .merge(tp53_scores_df, how='outer', on=['sample_id', 'tp53_score', 'Histology-Detailed'])
+    .merge(tp53_scores_df, how='outer', on=['sample_id', 'tp53_score', 'Histology.Detailed'])
 )
 tp53_df.loc[:, sub_cols] = tp53_df.loc[:, sub_cols].fillna(value='wild-type')
 
@@ -184,7 +184,7 @@ plt.savefig(file, dpi=400)
 
 
 # Visualize Osteosarcoma Specifically
-osteo_df = tp53_df[tp53_df["Histology-Detailed"] == "Osteosarcoma"]
+osteo_df = tp53_df[tp53_df["Histology.Detailed"] == "Osteosarcoma"]
 file = os.path.join('figures', 'TP53_osteosarcoma_variant_classification.pdf')
 
 plt.figure(figsize=(7.5, 4))
