@@ -58,7 +58,7 @@ np.random.seed(123)
 # In[4]:
 
 
-file = os.path.join('data', 'raw', '2019-01-14-ras-tp53-nf1-alterations.txt')
+file = os.path.join('data', 'raw', '2019-02-14-ras-tp53-nf1-alterations.txt')
 status_df = pd.read_table(file)
 
 print(status_df.shape)
@@ -80,16 +80,10 @@ status_df.Variant_Classification.value_counts()
 # In[7]:
 
 
-pd.crosstab(status_df['Histology.Detailed'], status_df.classifier)
-
-
-# In[8]:
-
-
 pd.crosstab(status_df['Histology.Detailed'], status_df.Hugo_Symbol)
 
 
-# In[9]:
+# In[8]:
 
 
 # Obtain a binary status matrix
@@ -98,7 +92,7 @@ full_status_df[full_status_df > 1] = 1
 full_status_df = full_status_df.reset_index()
 
 
-# In[10]:
+# In[9]:
 
 
 histology_df = status_df.loc[:, ['Model', 'Histology.Detailed']]
@@ -111,23 +105,25 @@ full_status_df = (
     .reset_index(drop=True)
 )
 
+print(full_status_df.shape)
 full_status_df.head()
 
 
 # ## Extract Gene Status
 
-# In[11]:
+# In[10]:
 
 
 # Ras Pathway Alterations
 ras_genes = ['KRAS', 'HRAS', 'NRAS']
-tp53_genes = ["TP53", "RB1", "CHEK2", "MDM2", "MDM4"]
+tp53_genes = ["TP53"]
+nf1_genes = ["NF1"]
 
 full_status_df = (
     full_status_df
     .assign(ras_status = full_status_df.loc[:, ras_genes].sum(axis=1),
             tp53_status = full_status_df.loc[:, tp53_genes].sum(axis=1),
-            nf1_status = full_status_df['NF1'])
+            nf1_status = full_status_df.loc[:, nf1_genes].sum(axis=1))
     
 )
 
@@ -138,10 +134,10 @@ full_status_df.head()
 # 
 # This stores histology information
 
-# In[12]:
+# In[11]:
 
 
-file = os.path.join('data', 'raw', '2018-09-30-pdx-clinical-final-for-paper.txt')
+file = os.path.join('data', 'raw', 'pptc-pdx-clinical-web.txt')
 clinical_df = pd.read_table(file)
 
 print(clinical_df.shape)
@@ -150,7 +146,7 @@ clinical_df.head(3)
 
 # ## Load Predictions and Merge with Clinical and Alteration Data
 
-# In[13]:
+# In[12]:
 
 
 file = os.path.join('results', 'classifier_scores.tsv')
@@ -171,7 +167,7 @@ print(scores_df.shape)
 scores_df.head()
 
 
-# In[14]:
+# In[13]:
 
 
 gene_status = ['tp53_status', 'ras_status', 'nf1_status']
@@ -192,12 +188,16 @@ scores_df.head(2)
 
 # ## Load Histology Color Codes
 
+# In[14]:
+
+
+file = os.path.join('data', '2019-07-09-all-hist-colors.txt')
+color_code_df = pd.read_csv(file)
+color_code_df.head(2)
+
+
 # In[15]:
 
-
-file = os.path.join('data', '2018-08-23-all-hist-colors.txt')
-color_code_df = pd.read_table(file)
-color_code_df.head(2)
 
 color_dict = dict(zip(color_code_df.Histology, color_code_df.Color))
 color_dict
@@ -423,39 +423,9 @@ get_mutant_boxplot(df=scores_df,
                    t_test_results=t_results_tp53)
 
 
-# In[29]:
-
-
-# Ras Alterations
-get_mutant_boxplot(df=scores_df,
-                   gene='Ras',
-                   histology=True,
-                   hist_color_dict=color_dict)
-
-
-# In[30]:
-
-
-# NF1 Alterations
-get_mutant_boxplot(df=scores_df,
-                   gene='NF1',
-                   histology=True,
-                   hist_color_dict=color_dict)
-
-
-# In[31]:
-
-
-# TP53 Alterations
-get_mutant_boxplot(df=scores_df,
-                   gene='TP53',
-                   histology=True,
-                   hist_color_dict=color_dict)
-
-
 # ## Write output files for downstream analysis
 
-# In[32]:
+# In[29]:
 
 
 # Classifier scores with clinical data and alteration status
@@ -468,13 +438,13 @@ scores_df[genes] = scores_df[genes].fillna(value=0)
 scores_df.sort_values(by='sample_id').to_csv(scores_file, sep='\t', index=False)
 
 
-# In[33]:
+# In[30]:
 
 
 # Output classifier scores for the specific variants observed
 status_scores_file = os.path.join("results", "classifier_scores_with_variants.tsv")
 
-classifier_scores_df = scores_df[['sample_id', 'ras_score' ,'tp53_score', 'nf1_score', 'Histology-Detailed']]
+classifier_scores_df = scores_df[['sample_id', 'ras_score' ,'tp53_score', 'nf1_score', 'Histology.Detailed']]
 classifier_scores_df = (
     status_df
     .drop(['Histology.Detailed'], axis='columns')
@@ -484,7 +454,7 @@ classifier_scores_df = (
 classifier_scores_df.sort_values(by='Model').to_csv(status_scores_file, sep='\t', index=False)
 
 
-# In[34]:
+# In[31]:
 
 
 # ROC Curve Estimates

@@ -66,7 +66,7 @@ np.random.seed(123)
 
 
 pandas2ri.activate()
-readRDS = robjects.r['readRDS']
+loadRDA = robjects.r['load']
 
 
 # In[5]:
@@ -79,11 +79,11 @@ os.makedirs('./results', exist_ok=True)
 # In[6]:
 
 
-# Load PDX gene expression data in RDS format
-file = os.path.join('data', 'raw', '2018-12-27-PPTC_FPKM_matrix_withModelID-248.RDS')
+# Load PDX gene expression data in RDA format
+file = os.path.join('data', 'raw', '2019-02-14-PPTC_FPKM_matrix_withModelID-244.rda')
 
-exprs_rds = readRDS(file)
-exprs_df = pandas2ri.ri2py(exprs_rds).set_index('gene_short_name').transpose()
+loadRDA(file)
+exprs_df = robjects.r['rna.mat'].set_index('gene_short_name').transpose()
 
 print(exprs_df.shape)
 exprs_df.head(3)
